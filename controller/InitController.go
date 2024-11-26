@@ -29,6 +29,11 @@ func InitController() *server.Hertz {
 
 	fileGroup := h.Group("/file")
 	fileGroup.POST("/single", middleware.JwtAuth(), UploadSingleSang)
+	fileGroup.POST("/album", middleware.JwtAuth(), CreateAlbum)
+
+	queryGroup := h.Group("/query")
+	queryGroup.GET("/list", QueryList)
+	queryGroup.GET("/album/message", GetAlbumDetail)
 
 	err := h.Run()
 	if err != nil {

@@ -38,3 +38,28 @@ func UploadSingleSang(c context.Context, req *app.RequestContext) {
 		})
 	}
 }
+
+func CreateAlbum(c context.Context, req *app.RequestContext) {
+	file, err := req.FormFile("cover")
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Get Sang Form File Failed:" + err.Error(),
+			Data: nil,
+		})
+	}
+	title := req.FormValue("title")
+	author := req.FormValue("author")
+	description := req.FormValue("description")
+	err = service.CreateNewAlbum(string(title), string(description), string(author), c, file)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Service Error :" + err.Error(),
+			Data: nil,
+		})
+	} else {
+		req.JSON(http.StatusOK, models.BaseResponse{
+			Msg:  "Ac",
+			Data: nil,
+		})
+	}
+}

@@ -1,4 +1,4 @@
-package models
+package response
 
 type UserLoginRes struct {
 	Id    string `json:"uid"`

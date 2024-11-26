@@ -22,7 +22,7 @@ func InitDB() *gorm.DB {
 
 	g.UseDB(db)
 
-	g.ApplyBasic(entity.User{}, entity.Album{}, entity.Single{})
+	g.ApplyBasic(entity.User{}, entity.Album{}, entity.Single{}, entity.Author{}, entity.SangList{}, entity.SangToList{})
 
 	g.Execute()
 

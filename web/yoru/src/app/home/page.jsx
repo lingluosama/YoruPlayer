@@ -14,8 +14,9 @@ import { PlayPage } from './children/PlayPage';
 import withAuth from "../components/withAuth"; 
 import PlayerComponent from "../components/Player"; 
 import { SvgPackOpen } from "../assets/svg/PackOpen"; 
-import {UploadPage} from "../components/element/UploadPage"; 
+import {EditSinglePage} from "../components/element/EditSinglePage"; 
 import {SvgUpload} from "../assets/svg/Upload"; 
+import {EditAlbumPage} from "../components/element/EditAlbumPage"; 
 
 const Page = () => {
   const [state, setState] = useState({
@@ -53,8 +54,10 @@ const Page = () => {
         return <MainPage />;
       case 'play':
         return <PlayPage />;
+      case 'album':
+        return  <EditAlbumPage />;   
       case `upload`:
-        return <UploadPage create={true}/>  
+        return <EditSinglePage create={true}/>  
       default:
         return <MainPage />;
     }
@@ -121,7 +124,7 @@ const Page = () => {
             }>
               <SvgHome w={24} h={24} />
             </NavigationItem>
-            <NavigationItem name="Album" onClick={() => handleState('currentView', 'play')}>
+            <NavigationItem name="Album" onClick={() => handleState('currentView', 'album')}>
               <SvgAlbum w={24} h={24} />
             </NavigationItem>
             <NavigationItem name={`Upload`} onClick={() => {handleState('currentView', 'upload')}}>

@@ -2,7 +2,7 @@ package service
 
 import (
 	"YoruPlayer/entity"
-	"YoruPlayer/models"
+	"YoruPlayer/models/response"
 	"YoruPlayer/service/query"
 	"context"
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func UserLogin(c context.Context, name string, password string) (*models.UserLoginRes, error) {
+func UserLogin(c context.Context, name string, password string) (*response.UserLoginRes, error) {
 	u := query.User
 	user, err := u.WithContext(c).Where(u.Name.Eq(name)).First()
 	if err != nil {
@@ -19,7 +19,7 @@ func UserLogin(c context.Context, name string, password string) (*models.UserLog
 	if user == nil {
 		return nil, errors.New("can't find user")
 	}
-	res := &models.UserLoginRes{
+	res := &response.UserLoginRes{
 		Id:    strconv.FormatInt(user.Id, 10),
 		Token: GenerateToken(strconv.FormatInt(user.Id, 10)),
 	}

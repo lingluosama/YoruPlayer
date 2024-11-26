@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { SvgCancel } from "../../assets/svg/Cancel"; 
 import {$httpFormData, UploadNewSingle} from "../http/fileApi"; 
 
-export function UploadPage(props) {
+export function EditSinglePage(props) {
     const SingleRef = useRef(null);
     const CoverRef = useRef(null);
     const [state, setState] = useState({
@@ -48,7 +48,7 @@ export function UploadPage(props) {
         }
     };
 
-const handleSubmit = () => {
+const handleSubmit =async () => {
     const formData = new FormData();
     if (state.cover) {
         formData.append("cover", state.cover,state.coverFileName);
@@ -59,7 +59,7 @@ const handleSubmit = () => {
     formData.append("author", state.author);
     formData.append("title", state.title);
 
-    $httpFormData(formData, "/file/single") // Replace "/upload-endpoint" with the actual endpoint
+   await  $httpFormData(formData, "/file/single") 
         .then(response => {
             console.log(response);
         })

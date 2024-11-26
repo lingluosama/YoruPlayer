@@ -1,0 +1,49 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.slide-in { animation: slide-in 0.3s forwards; } 
+.slide-out { animation: slide-out 0.3s forwards; }
+.translate-y-full {
+  transform: translateY(100%);
+}
+
+.translate-y-0 {
+  transform: translateY(0);
+}
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.rotate-y-180 {
+  transform: rotateY(90deg);
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
+}
+
+.visibility-hidden {
+  visibility: hidden;
+}
+
+.transition-transform {
+  transition: transform 0.3s, visibility 0.5s;
+}

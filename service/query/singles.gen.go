@@ -16,14 +16,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
 )
 
 func newSingle(db *gorm.DB, opts ...gen.DOOption) single {
 	_single := single{}
 
 	_single.singleDo.UseDB(db, opts...)
-	_single.singleDo.UseModel(&entity.Single{})
+	_single.singleDo.UseModel(&Db.Single{})
 
 	tableName := _single.singleDo.TableName()
 	_single.ALL = field.NewAsterisk(tableName)
@@ -141,17 +141,17 @@ type ISingleDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) ISingleDo
 	Unscoped() ISingleDo
-	Create(values ...*entity.Single) error
-	CreateInBatches(values []*entity.Single, batchSize int) error
-	Save(values ...*entity.Single) error
-	First() (*entity.Single, error)
-	Take() (*entity.Single, error)
-	Last() (*entity.Single, error)
-	Find() ([]*entity.Single, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Single, err error)
-	FindInBatches(result *[]*entity.Single, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*Db.Single) error
+	CreateInBatches(values []*Db.Single, batchSize int) error
+	Save(values ...*Db.Single) error
+	First() (*Db.Single, error)
+	Take() (*Db.Single, error)
+	Last() (*Db.Single, error)
+	Find() ([]*Db.Single, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.Single, err error)
+	FindInBatches(result *[]*Db.Single, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.Single) (info gen.ResultInfo, err error)
+	Delete(...*Db.Single) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -163,9 +163,9 @@ type ISingleDo interface {
 	Assign(attrs ...field.AssignExpr) ISingleDo
 	Joins(fields ...field.RelationField) ISingleDo
 	Preload(fields ...field.RelationField) ISingleDo
-	FirstOrInit() (*entity.Single, error)
-	FirstOrCreate() (*entity.Single, error)
-	FindByPage(offset int, limit int) (result []*entity.Single, count int64, err error)
+	FirstOrInit() (*Db.Single, error)
+	FirstOrCreate() (*Db.Single, error)
+	FindByPage(offset int, limit int) (result []*Db.Single, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Scan(result interface{}) (err error)
 	Returning(value interface{}, columns ...string) ISingleDo
@@ -265,57 +265,57 @@ func (s singleDo) Unscoped() ISingleDo {
 	return s.withDO(s.DO.Unscoped())
 }
 
-func (s singleDo) Create(values ...*entity.Single) error {
+func (s singleDo) Create(values ...*Db.Single) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Create(values)
 }
 
-func (s singleDo) CreateInBatches(values []*entity.Single, batchSize int) error {
+func (s singleDo) CreateInBatches(values []*Db.Single, batchSize int) error {
 	return s.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (s singleDo) Save(values ...*entity.Single) error {
+func (s singleDo) Save(values ...*Db.Single) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Save(values)
 }
 
-func (s singleDo) First() (*entity.Single, error) {
+func (s singleDo) First() (*Db.Single, error) {
 	if result, err := s.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Single), nil
+		return result.(*Db.Single), nil
 	}
 }
 
-func (s singleDo) Take() (*entity.Single, error) {
+func (s singleDo) Take() (*Db.Single, error) {
 	if result, err := s.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Single), nil
+		return result.(*Db.Single), nil
 	}
 }
 
-func (s singleDo) Last() (*entity.Single, error) {
+func (s singleDo) Last() (*Db.Single, error) {
 	if result, err := s.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Single), nil
+		return result.(*Db.Single), nil
 	}
 }
 
-func (s singleDo) Find() ([]*entity.Single, error) {
+func (s singleDo) Find() ([]*Db.Single, error) {
 	result, err := s.DO.Find()
-	return result.([]*entity.Single), err
+	return result.([]*Db.Single), err
 }
 
-func (s singleDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Single, err error) {
-	buf := make([]*entity.Single, 0, batchSize)
+func (s singleDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.Single, err error) {
+	buf := make([]*Db.Single, 0, batchSize)
 	err = s.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -323,7 +323,7 @@ func (s singleDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) erro
 	return results, err
 }
 
-func (s singleDo) FindInBatches(result *[]*entity.Single, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (s singleDo) FindInBatches(result *[]*Db.Single, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return s.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -349,23 +349,23 @@ func (s singleDo) Preload(fields ...field.RelationField) ISingleDo {
 	return &s
 }
 
-func (s singleDo) FirstOrInit() (*entity.Single, error) {
+func (s singleDo) FirstOrInit() (*Db.Single, error) {
 	if result, err := s.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Single), nil
+		return result.(*Db.Single), nil
 	}
 }
 
-func (s singleDo) FirstOrCreate() (*entity.Single, error) {
+func (s singleDo) FirstOrCreate() (*Db.Single, error) {
 	if result, err := s.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Single), nil
+		return result.(*Db.Single), nil
 	}
 }
 
-func (s singleDo) FindByPage(offset int, limit int) (result []*entity.Single, count int64, err error) {
+func (s singleDo) FindByPage(offset int, limit int) (result []*Db.Single, count int64, err error) {
 	result, err = s.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -394,7 +394,7 @@ func (s singleDo) Scan(result interface{}) (err error) {
 	return s.DO.Scan(result)
 }
 
-func (s singleDo) Delete(models ...*entity.Single) (result gen.ResultInfo, err error) {
+func (s singleDo) Delete(models ...*Db.Single) (result gen.ResultInfo, err error) {
 	return s.DO.Delete(models)
 }
 

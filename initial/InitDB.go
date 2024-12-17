@@ -2,7 +2,7 @@ package initial
 
 import (
 	"YoruPlayer/configs"
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
 	"YoruPlayer/service/query"
 	"gorm.io/driver/mysql"
 	"gorm.io/gen"
@@ -22,7 +22,7 @@ func InitDB() *gorm.DB {
 
 	g.UseDB(db)
 
-	g.ApplyBasic(entity.User{}, entity.Album{}, entity.Single{}, entity.Author{}, entity.SangList{}, entity.SangToList{})
+	g.ApplyBasic(Db.User{}, Db.Album{}, Db.Single{}, Db.Author{}, Db.SangList{}, Db.SangToList{})
 
 	g.Execute()
 

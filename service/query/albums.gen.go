@@ -16,14 +16,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
 )
 
 func newAlbum(db *gorm.DB, opts ...gen.DOOption) album {
 	_album := album{}
 
 	_album.albumDo.UseDB(db, opts...)
-	_album.albumDo.UseModel(&entity.Album{})
+	_album.albumDo.UseModel(&Db.Album{})
 
 	tableName := _album.albumDo.TableName()
 	_album.ALL = field.NewAsterisk(tableName)
@@ -133,17 +133,17 @@ type IAlbumDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) IAlbumDo
 	Unscoped() IAlbumDo
-	Create(values ...*entity.Album) error
-	CreateInBatches(values []*entity.Album, batchSize int) error
-	Save(values ...*entity.Album) error
-	First() (*entity.Album, error)
-	Take() (*entity.Album, error)
-	Last() (*entity.Album, error)
-	Find() ([]*entity.Album, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Album, err error)
-	FindInBatches(result *[]*entity.Album, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*Db.Album) error
+	CreateInBatches(values []*Db.Album, batchSize int) error
+	Save(values ...*Db.Album) error
+	First() (*Db.Album, error)
+	Take() (*Db.Album, error)
+	Last() (*Db.Album, error)
+	Find() ([]*Db.Album, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.Album, err error)
+	FindInBatches(result *[]*Db.Album, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.Album) (info gen.ResultInfo, err error)
+	Delete(...*Db.Album) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -155,9 +155,9 @@ type IAlbumDo interface {
 	Assign(attrs ...field.AssignExpr) IAlbumDo
 	Joins(fields ...field.RelationField) IAlbumDo
 	Preload(fields ...field.RelationField) IAlbumDo
-	FirstOrInit() (*entity.Album, error)
-	FirstOrCreate() (*entity.Album, error)
-	FindByPage(offset int, limit int) (result []*entity.Album, count int64, err error)
+	FirstOrInit() (*Db.Album, error)
+	FirstOrCreate() (*Db.Album, error)
+	FindByPage(offset int, limit int) (result []*Db.Album, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Scan(result interface{}) (err error)
 	Returning(value interface{}, columns ...string) IAlbumDo
@@ -257,57 +257,57 @@ func (a albumDo) Unscoped() IAlbumDo {
 	return a.withDO(a.DO.Unscoped())
 }
 
-func (a albumDo) Create(values ...*entity.Album) error {
+func (a albumDo) Create(values ...*Db.Album) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return a.DO.Create(values)
 }
 
-func (a albumDo) CreateInBatches(values []*entity.Album, batchSize int) error {
+func (a albumDo) CreateInBatches(values []*Db.Album, batchSize int) error {
 	return a.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (a albumDo) Save(values ...*entity.Album) error {
+func (a albumDo) Save(values ...*Db.Album) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return a.DO.Save(values)
 }
 
-func (a albumDo) First() (*entity.Album, error) {
+func (a albumDo) First() (*Db.Album, error) {
 	if result, err := a.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Album), nil
+		return result.(*Db.Album), nil
 	}
 }
 
-func (a albumDo) Take() (*entity.Album, error) {
+func (a albumDo) Take() (*Db.Album, error) {
 	if result, err := a.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Album), nil
+		return result.(*Db.Album), nil
 	}
 }
 
-func (a albumDo) Last() (*entity.Album, error) {
+func (a albumDo) Last() (*Db.Album, error) {
 	if result, err := a.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Album), nil
+		return result.(*Db.Album), nil
 	}
 }
 
-func (a albumDo) Find() ([]*entity.Album, error) {
+func (a albumDo) Find() ([]*Db.Album, error) {
 	result, err := a.DO.Find()
-	return result.([]*entity.Album), err
+	return result.([]*Db.Album), err
 }
 
-func (a albumDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Album, err error) {
-	buf := make([]*entity.Album, 0, batchSize)
+func (a albumDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.Album, err error) {
+	buf := make([]*Db.Album, 0, batchSize)
 	err = a.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -315,7 +315,7 @@ func (a albumDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error
 	return results, err
 }
 
-func (a albumDo) FindInBatches(result *[]*entity.Album, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (a albumDo) FindInBatches(result *[]*Db.Album, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return a.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -341,23 +341,23 @@ func (a albumDo) Preload(fields ...field.RelationField) IAlbumDo {
 	return &a
 }
 
-func (a albumDo) FirstOrInit() (*entity.Album, error) {
+func (a albumDo) FirstOrInit() (*Db.Album, error) {
 	if result, err := a.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Album), nil
+		return result.(*Db.Album), nil
 	}
 }
 
-func (a albumDo) FirstOrCreate() (*entity.Album, error) {
+func (a albumDo) FirstOrCreate() (*Db.Album, error) {
 	if result, err := a.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Album), nil
+		return result.(*Db.Album), nil
 	}
 }
 
-func (a albumDo) FindByPage(offset int, limit int) (result []*entity.Album, count int64, err error) {
+func (a albumDo) FindByPage(offset int, limit int) (result []*Db.Album, count int64, err error) {
 	result, err = a.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -386,7 +386,7 @@ func (a albumDo) Scan(result interface{}) (err error) {
 	return a.DO.Scan(result)
 }
 
-func (a albumDo) Delete(models ...*entity.Album) (result gen.ResultInfo, err error) {
+func (a albumDo) Delete(models ...*Db.Album) (result gen.ResultInfo, err error) {
 	return a.DO.Delete(models)
 }
 

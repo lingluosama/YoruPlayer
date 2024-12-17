@@ -13,12 +13,11 @@ func main() {
 	service.RedisUtils = initial.RedisClient{
 		R: redis,
 	}
-
+	initial.InitAllListener()
 	minio := initial.InitMinio()
 	service.MinioUtils = initial.MinioClient{
 		M: minio,
 	}
-
-	initial.InitAllListener()
 	controller.InitController()
+
 }

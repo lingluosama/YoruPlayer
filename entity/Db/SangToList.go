@@ -1,4 +1,4 @@
-package entity
+package Db
 
 type SangToList struct {
 	LID int64 `gorm:"column:lid;primaryKey" json:"lid"`

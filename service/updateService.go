@@ -2,7 +2,7 @@ package service
 
 import (
 	"YoruPlayer/configs"
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
 	"YoruPlayer/service/query"
 	"context"
 	"mime/multipart"
@@ -34,7 +34,7 @@ func UploadSingleSang(title string, author string, c context.Context, audio *mul
 	if err != nil {
 		return err
 	}
-	err = query.Single.Save(&entity.Single{
+	err = query.Single.Save(&Db.Single{
 		Id:       *id,
 		Resource: resource,
 		Cover:    *coverUrl,
@@ -56,7 +56,7 @@ func UpdateSingleInfo(c context.Context, sid int64, title string, author string,
 		if err != nil {
 			return err
 		}
-		_, err = query.Single.WithContext(c).Where(query.Single.Id.Eq(sid)).Updates(entity.Single{
+		_, err = query.Single.WithContext(c).Where(query.Single.Id.Eq(sid)).Updates(Db.Single{
 			Cover:  *coverUrl,
 			Title:  title,
 			Author: author,
@@ -65,7 +65,7 @@ func UpdateSingleInfo(c context.Context, sid int64, title string, author string,
 			return err
 		}
 	} else {
-		_, err = query.Single.WithContext(c).Where(query.Single.Id.Eq(sid)).Updates(entity.Single{
+		_, err = query.Single.WithContext(c).Where(query.Single.Id.Eq(sid)).Updates(Db.Single{
 			Title:  title,
 			Author: author,
 		})
@@ -114,7 +114,7 @@ func CreateNewAlbum(title string, description string, author string, c context.C
 		return err
 	}
 	AccessUrl := configs.MinIOEndPoint + "/cover-album/" + objectName
-	err = query.Album.Save(&entity.Album{
+	err = query.Album.Save(&Db.Album{
 		Id:          *id,
 		Title:       title,
 		Cover:       AccessUrl,
@@ -144,7 +144,7 @@ func UpdateAlbumInfo(aid int64, title string, description string, author string,
 			return err
 		}
 		AccessUrl := configs.MinIOEndPoint + "/cover-album/" + objectName
-		_, err = db.Where(query.Album.Id.Eq(aid)).Updates(entity.Album{
+		_, err = db.Where(query.Album.Id.Eq(aid)).Updates(Db.Album{
 			Title:       title,
 			Cover:       AccessUrl,
 			Author:      author,
@@ -154,7 +154,7 @@ func UpdateAlbumInfo(aid int64, title string, description string, author string,
 			return err
 		}
 	} else {
-		_, err := db.Where(query.Album.Id.Eq(aid)).Updates(entity.Album{
+		_, err := db.Where(query.Album.Id.Eq(aid)).Updates(Db.Album{
 			Title:       title,
 			Author:      author,
 			Description: description,
@@ -162,6 +162,44 @@ func UpdateAlbumInfo(aid int64, title string, description string, author string,
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func AddSingleToAlbum(aid int64, sid int64, c context.Context) error {
+	_, err := query.Single.WithContext(c).Where(query.Single.Id.Eq(sid)).Updates(Db.Single{AlbumId: aid})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateAuthor(c context.Context, name string, header *multipart.FileHeader) error {
+	id, err := GenSnowFlakeId(6)
+	if err != nil {
+		return err
+	}
+	ext := filepath.Ext(header.Filename)
+	if ext == "" {
+		ext = ".png"
+	}
+	objectname := strconv.FormatInt(*id, 10) + ext
+	open, err := header.Open()
+	if err != nil {
+		return err
+	}
+	err = MinioUtils.PutFile(c, "author-avatar", objectname, open, header)
+	if err != nil {
+		return err
+	}
+	avatar := configs.MinIOEndPoint + "/author-avatar/" + objectname
+	err = query.Author.Save(&Db.Author{
+		Id:     *id,
+		Name:   name,
+		Avatar: avatar,
+	})
+	if err != nil {
+		return err
 	}
 	return nil
 

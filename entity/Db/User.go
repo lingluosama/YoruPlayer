@@ -1,4 +1,4 @@
-package entity
+package Db
 
 type User struct {
 	Id        int64  `gorm:"primaryKey;column:id" json:"id"`

@@ -16,14 +16,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
 )
 
 func newAuthor(db *gorm.DB, opts ...gen.DOOption) author {
 	_author := author{}
 
 	_author.authorDo.UseDB(db, opts...)
-	_author.authorDo.UseModel(&entity.Author{})
+	_author.authorDo.UseModel(&Db.Author{})
 
 	tableName := _author.authorDo.TableName()
 	_author.ALL = field.NewAsterisk(tableName)
@@ -125,17 +125,17 @@ type IAuthorDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) IAuthorDo
 	Unscoped() IAuthorDo
-	Create(values ...*entity.Author) error
-	CreateInBatches(values []*entity.Author, batchSize int) error
-	Save(values ...*entity.Author) error
-	First() (*entity.Author, error)
-	Take() (*entity.Author, error)
-	Last() (*entity.Author, error)
-	Find() ([]*entity.Author, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Author, err error)
-	FindInBatches(result *[]*entity.Author, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*Db.Author) error
+	CreateInBatches(values []*Db.Author, batchSize int) error
+	Save(values ...*Db.Author) error
+	First() (*Db.Author, error)
+	Take() (*Db.Author, error)
+	Last() (*Db.Author, error)
+	Find() ([]*Db.Author, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.Author, err error)
+	FindInBatches(result *[]*Db.Author, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.Author) (info gen.ResultInfo, err error)
+	Delete(...*Db.Author) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -147,9 +147,9 @@ type IAuthorDo interface {
 	Assign(attrs ...field.AssignExpr) IAuthorDo
 	Joins(fields ...field.RelationField) IAuthorDo
 	Preload(fields ...field.RelationField) IAuthorDo
-	FirstOrInit() (*entity.Author, error)
-	FirstOrCreate() (*entity.Author, error)
-	FindByPage(offset int, limit int) (result []*entity.Author, count int64, err error)
+	FirstOrInit() (*Db.Author, error)
+	FirstOrCreate() (*Db.Author, error)
+	FindByPage(offset int, limit int) (result []*Db.Author, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Scan(result interface{}) (err error)
 	Returning(value interface{}, columns ...string) IAuthorDo
@@ -249,57 +249,57 @@ func (a authorDo) Unscoped() IAuthorDo {
 	return a.withDO(a.DO.Unscoped())
 }
 
-func (a authorDo) Create(values ...*entity.Author) error {
+func (a authorDo) Create(values ...*Db.Author) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return a.DO.Create(values)
 }
 
-func (a authorDo) CreateInBatches(values []*entity.Author, batchSize int) error {
+func (a authorDo) CreateInBatches(values []*Db.Author, batchSize int) error {
 	return a.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (a authorDo) Save(values ...*entity.Author) error {
+func (a authorDo) Save(values ...*Db.Author) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return a.DO.Save(values)
 }
 
-func (a authorDo) First() (*entity.Author, error) {
+func (a authorDo) First() (*Db.Author, error) {
 	if result, err := a.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Author), nil
+		return result.(*Db.Author), nil
 	}
 }
 
-func (a authorDo) Take() (*entity.Author, error) {
+func (a authorDo) Take() (*Db.Author, error) {
 	if result, err := a.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Author), nil
+		return result.(*Db.Author), nil
 	}
 }
 
-func (a authorDo) Last() (*entity.Author, error) {
+func (a authorDo) Last() (*Db.Author, error) {
 	if result, err := a.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Author), nil
+		return result.(*Db.Author), nil
 	}
 }
 
-func (a authorDo) Find() ([]*entity.Author, error) {
+func (a authorDo) Find() ([]*Db.Author, error) {
 	result, err := a.DO.Find()
-	return result.([]*entity.Author), err
+	return result.([]*Db.Author), err
 }
 
-func (a authorDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.Author, err error) {
-	buf := make([]*entity.Author, 0, batchSize)
+func (a authorDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.Author, err error) {
+	buf := make([]*Db.Author, 0, batchSize)
 	err = a.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -307,7 +307,7 @@ func (a authorDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) erro
 	return results, err
 }
 
-func (a authorDo) FindInBatches(result *[]*entity.Author, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (a authorDo) FindInBatches(result *[]*Db.Author, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return a.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -333,23 +333,23 @@ func (a authorDo) Preload(fields ...field.RelationField) IAuthorDo {
 	return &a
 }
 
-func (a authorDo) FirstOrInit() (*entity.Author, error) {
+func (a authorDo) FirstOrInit() (*Db.Author, error) {
 	if result, err := a.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Author), nil
+		return result.(*Db.Author), nil
 	}
 }
 
-func (a authorDo) FirstOrCreate() (*entity.Author, error) {
+func (a authorDo) FirstOrCreate() (*Db.Author, error) {
 	if result, err := a.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.Author), nil
+		return result.(*Db.Author), nil
 	}
 }
 
-func (a authorDo) FindByPage(offset int, limit int) (result []*entity.Author, count int64, err error) {
+func (a authorDo) FindByPage(offset int, limit int) (result []*Db.Author, count int64, err error) {
 	result, err = a.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -378,7 +378,7 @@ func (a authorDo) Scan(result interface{}) (err error) {
 	return a.DO.Scan(result)
 }
 
-func (a authorDo) Delete(models ...*entity.Author) (result gen.ResultInfo, err error) {
+func (a authorDo) Delete(models ...*Db.Author) (result gen.ResultInfo, err error) {
 	return a.DO.Delete(models)
 }
 

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
 	"YoruPlayer/models/response"
 	"YoruPlayer/service/query"
 	"context"
@@ -26,7 +26,7 @@ func UserLogin(c context.Context, name string, password string) (*response.UserL
 	return res, nil
 }
 
-func GetUserInfo(c context.Context, uid string) (*entity.User, error) {
+func GetUserInfo(c context.Context, uid string) (*Db.User, error) {
 	u := query.User
 	id, err := strconv.ParseInt(uid, 10, 64)
 	if err != nil {
@@ -46,7 +46,7 @@ func UserRegister(c context.Context, name string, password string, email string)
 		log.Panicln("SnowFlakeErr:", err)
 	}
 
-	user := &entity.User{
+	user := &Db.User{
 		Id:        *id,
 		Name:      name,
 		Password:  password,
@@ -69,4 +69,24 @@ func UserRegister(c context.Context, name string, password string, email string)
 	}
 
 	return nil
+}
+
+func CreateSangList(c context.Context, uid int64, title string) error {
+	id, err := GenSnowFlakeId(5)
+	if err != nil {
+		log.Panicln("SnowFlakeErr:", err)
+	}
+
+	list := &Db.SangList{
+		Id:      *id,
+		Cover:   "null",
+		Creater: uid,
+		Title:   title,
+	}
+	err = query.SangList.WithContext(c).Save(list)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

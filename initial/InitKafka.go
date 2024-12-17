@@ -1,7 +1,9 @@
 package initial
 
 import (
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
+	"YoruPlayer/models/kafkaMessage"
+	"YoruPlayer/service/query"
 	"context"
 	"encoding/json"
 	"errors"
@@ -62,7 +64,7 @@ func QueryAllSongListener() {
 			log.Printf("failed to read message: %v\n", err)
 			continue
 		}
-		var album entity.Album
+		var album Db.Album
 		err = json.Unmarshal(message.Value, &album)
 		if err != nil {
 			log.Println("Unmarshal failed in All-sangs Listener")
@@ -75,6 +77,70 @@ func QueryAllSongListener() {
 
 }
 
+func AddToSangListListener() {
+	r := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: kafkaBrokers,
+		GroupID: "add-sang-list-group",
+		Topic:   "add-sang-list",
+	})
+	defer r.Close()
+
+	for {
+		ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
+		message, err := r.ReadMessage(ctx)
+		cancelFunc()
+		if errors.Is(err, context.DeadlineExceeded) {
+			continue
+		}
+		if err != nil {
+			log.Printf("AddToSangListListener failed to read message: %v\n", err)
+			continue
+		}
+
+		var data kafkaMessage.AddSangListMessage
+		err = json.Unmarshal(message.Value, &data)
+		if err != nil {
+			log.Println("Unmarshal failed in AddToSangListListener")
+			continue
+		}
+
+		_, err = query.SangToList.
+			Where(query.SangToList.SID.Eq(data.Sid)).
+			Where(query.SangToList.LID.Eq(data.Lid)).
+			First()
+		if err == nil {
+			log.Println("重复添加歌曲")
+			continue
+		} else if err != nil && err.Error() != "record not found" {
+			log.Printf("AddToSangListListener Err: %v\n", err)
+			continue
+		}
+
+		err = query.SangToList.WithContext(context.Background()).Save(&Db.SangToList{
+			LID: data.Lid,
+			SID: data.Sid,
+		})
+		if err != nil {
+			log.Printf("AddToSangListListener Err: %v\n", err)
+			continue
+		}
+
+		sanginfo, err := query.Single.WithContext(context.Background()).Where(query.Single.Id.Eq(data.Sid)).First()
+		if err != nil {
+			log.Printf("QuerySangMessageErr: %v\n", err)
+			continue
+		}
+
+		_, err = query.SangList.WithContext(context.Background()).Where(query.SangList.Id.Eq(data.Lid)).Updates(Db.SangList{Cover: sanginfo.Cover})
+		if err != nil {
+			log.Printf("AddToSangListListener Err: %v\n", err)
+		}
+
+		log.Println("成功添加歌曲")
+	}
+}
+
 func InitAllListener() {
 	go QueryAllSongListener()
+	go AddToSangListListener()
 }

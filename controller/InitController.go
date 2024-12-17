@@ -26,14 +26,30 @@ func InitController() *server.Hertz {
 	userGroup.GET("/login", Login)
 	userGroup.GET("/info", middleware.JwtAuth(), GetUserInfo)
 	userGroup.POST("/register", UserRegister)
+	userGroup.POST("/create/sanglist", CreateSangList)
+	userGroup.POST("/sanglist/add", AddSingleToSangList)
 
 	fileGroup := h.Group("/file")
 	fileGroup.POST("/single", middleware.JwtAuth(), UploadSingleSang)
 	fileGroup.POST("/album", middleware.JwtAuth(), CreateAlbum)
+	fileGroup.POST("/update/single", middleware.JwtAuth(), UpdateSingleInfo)
+	fileGroup.POST("/update/album", middleware.JwtAuth(), UpdateAlbumInfo)
+	fileGroup.POST("/add/album", middleware.JwtAuth(), AddSingleToAlbum)
+	fileGroup.POST("/author", UploadNewAuthorInfo)
 
 	queryGroup := h.Group("/query")
+	queryGroup.GET("/single/message", GetSingleDetail)
 	queryGroup.GET("/list", QueryList)
 	queryGroup.GET("/album/message", GetAlbumDetail)
+	queryGroup.GET("/sanglist/message", GetSangListDetail)
+	queryGroup.GET("/author/name", QueryAuthorByName)
+	queryGroup.POST("album/names", QueryAlbumNameWithIds)
+	queryGroup.GET("/author/message", GetAuthorDetail)
+
+	playGroup := h.Group("/play")
+	playGroup.GET("/query", middleware.JwtAuth(), QueryQueue)
+	playGroup.POST("/add", middleware.JwtAuth(), AddPlayListQueue)
+	playGroup.POST("/delete", middleware.JwtAuth(), DeleteFormQueue)
 
 	err := h.Run()
 	if err != nil {

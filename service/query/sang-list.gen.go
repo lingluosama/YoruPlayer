@@ -16,20 +16,21 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"YoruPlayer/entity"
+	"YoruPlayer/entity/Db"
 )
 
 func newSangList(db *gorm.DB, opts ...gen.DOOption) sangList {
 	_sangList := sangList{}
 
 	_sangList.sangListDo.UseDB(db, opts...)
-	_sangList.sangListDo.UseModel(&entity.SangList{})
+	_sangList.sangListDo.UseModel(&Db.SangList{})
 
 	tableName := _sangList.sangListDo.TableName()
 	_sangList.ALL = field.NewAsterisk(tableName)
 	_sangList.Id = field.NewInt64(tableName, "id")
 	_sangList.Cover = field.NewString(tableName, "cover")
 	_sangList.Creater = field.NewInt64(tableName, "creater")
+	_sangList.Title = field.NewString(tableName, "title")
 
 	_sangList.fillFieldMap()
 
@@ -43,6 +44,7 @@ type sangList struct {
 	Id      field.Int64
 	Cover   field.String
 	Creater field.Int64
+	Title   field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -62,6 +64,7 @@ func (s *sangList) updateTableName(table string) *sangList {
 	s.Id = field.NewInt64(table, "id")
 	s.Cover = field.NewString(table, "cover")
 	s.Creater = field.NewInt64(table, "creater")
+	s.Title = field.NewString(table, "title")
 
 	s.fillFieldMap()
 
@@ -78,10 +81,11 @@ func (s *sangList) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *sangList) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 3)
+	s.fieldMap = make(map[string]field.Expr, 4)
 	s.fieldMap["id"] = s.Id
 	s.fieldMap["cover"] = s.Cover
 	s.fieldMap["creater"] = s.Creater
+	s.fieldMap["title"] = s.Title
 }
 
 func (s sangList) clone(db *gorm.DB) sangList {
@@ -125,17 +129,17 @@ type ISangListDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) ISangListDo
 	Unscoped() ISangListDo
-	Create(values ...*entity.SangList) error
-	CreateInBatches(values []*entity.SangList, batchSize int) error
-	Save(values ...*entity.SangList) error
-	First() (*entity.SangList, error)
-	Take() (*entity.SangList, error)
-	Last() (*entity.SangList, error)
-	Find() ([]*entity.SangList, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.SangList, err error)
-	FindInBatches(result *[]*entity.SangList, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*Db.SangList) error
+	CreateInBatches(values []*Db.SangList, batchSize int) error
+	Save(values ...*Db.SangList) error
+	First() (*Db.SangList, error)
+	Take() (*Db.SangList, error)
+	Last() (*Db.SangList, error)
+	Find() ([]*Db.SangList, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.SangList, err error)
+	FindInBatches(result *[]*Db.SangList, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*entity.SangList) (info gen.ResultInfo, err error)
+	Delete(...*Db.SangList) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -147,9 +151,9 @@ type ISangListDo interface {
 	Assign(attrs ...field.AssignExpr) ISangListDo
 	Joins(fields ...field.RelationField) ISangListDo
 	Preload(fields ...field.RelationField) ISangListDo
-	FirstOrInit() (*entity.SangList, error)
-	FirstOrCreate() (*entity.SangList, error)
-	FindByPage(offset int, limit int) (result []*entity.SangList, count int64, err error)
+	FirstOrInit() (*Db.SangList, error)
+	FirstOrCreate() (*Db.SangList, error)
+	FindByPage(offset int, limit int) (result []*Db.SangList, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Scan(result interface{}) (err error)
 	Returning(value interface{}, columns ...string) ISangListDo
@@ -249,57 +253,57 @@ func (s sangListDo) Unscoped() ISangListDo {
 	return s.withDO(s.DO.Unscoped())
 }
 
-func (s sangListDo) Create(values ...*entity.SangList) error {
+func (s sangListDo) Create(values ...*Db.SangList) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Create(values)
 }
 
-func (s sangListDo) CreateInBatches(values []*entity.SangList, batchSize int) error {
+func (s sangListDo) CreateInBatches(values []*Db.SangList, batchSize int) error {
 	return s.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (s sangListDo) Save(values ...*entity.SangList) error {
+func (s sangListDo) Save(values ...*Db.SangList) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return s.DO.Save(values)
 }
 
-func (s sangListDo) First() (*entity.SangList, error) {
+func (s sangListDo) First() (*Db.SangList, error) {
 	if result, err := s.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SangList), nil
+		return result.(*Db.SangList), nil
 	}
 }
 
-func (s sangListDo) Take() (*entity.SangList, error) {
+func (s sangListDo) Take() (*Db.SangList, error) {
 	if result, err := s.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SangList), nil
+		return result.(*Db.SangList), nil
 	}
 }
 
-func (s sangListDo) Last() (*entity.SangList, error) {
+func (s sangListDo) Last() (*Db.SangList, error) {
 	if result, err := s.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SangList), nil
+		return result.(*Db.SangList), nil
 	}
 }
 
-func (s sangListDo) Find() ([]*entity.SangList, error) {
+func (s sangListDo) Find() ([]*Db.SangList, error) {
 	result, err := s.DO.Find()
-	return result.([]*entity.SangList), err
+	return result.([]*Db.SangList), err
 }
 
-func (s sangListDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*entity.SangList, err error) {
-	buf := make([]*entity.SangList, 0, batchSize)
+func (s sangListDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*Db.SangList, err error) {
+	buf := make([]*Db.SangList, 0, batchSize)
 	err = s.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -307,7 +311,7 @@ func (s sangListDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) er
 	return results, err
 }
 
-func (s sangListDo) FindInBatches(result *[]*entity.SangList, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (s sangListDo) FindInBatches(result *[]*Db.SangList, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return s.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -333,23 +337,23 @@ func (s sangListDo) Preload(fields ...field.RelationField) ISangListDo {
 	return &s
 }
 
-func (s sangListDo) FirstOrInit() (*entity.SangList, error) {
+func (s sangListDo) FirstOrInit() (*Db.SangList, error) {
 	if result, err := s.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SangList), nil
+		return result.(*Db.SangList), nil
 	}
 }
 
-func (s sangListDo) FirstOrCreate() (*entity.SangList, error) {
+func (s sangListDo) FirstOrCreate() (*Db.SangList, error) {
 	if result, err := s.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*entity.SangList), nil
+		return result.(*Db.SangList), nil
 	}
 }
 
-func (s sangListDo) FindByPage(offset int, limit int) (result []*entity.SangList, count int64, err error) {
+func (s sangListDo) FindByPage(offset int, limit int) (result []*Db.SangList, count int64, err error) {
 	result, err = s.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -378,7 +382,7 @@ func (s sangListDo) Scan(result interface{}) (err error) {
 	return s.DO.Scan(result)
 }
 
-func (s sangListDo) Delete(models ...*entity.SangList) (result gen.ResultInfo, err error) {
+func (s sangListDo) Delete(models ...*Db.SangList) (result gen.ResultInfo, err error) {
 	return s.DO.Delete(models)
 }
 

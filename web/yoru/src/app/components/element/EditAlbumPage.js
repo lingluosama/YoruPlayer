@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"; 
 import { SvgCancel } from "../../assets/svg/Cancel"; 
-import {$httpFormData} from "../http/fileApi"; 
+import {$httpFormData} from "../http/FormDataApi"; 
 
 export function EditAlbumPage(props) {
     const CoverRef = useRef(null);

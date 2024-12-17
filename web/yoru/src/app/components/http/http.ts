@@ -25,12 +25,10 @@ export const $http = async (
     headers['Content-Type'] = 'application/json';
     const queryParams = new URLSearchParams(data).toString();
     fullUrl += queryParams ? `?${queryParams}` : '';
-    body = JSON.stringify(data);
   }
 
   return fetch(fullUrl, {
     method: method,
     headers: headers,
-    body: body,
   }).then(response => response.json());
 };

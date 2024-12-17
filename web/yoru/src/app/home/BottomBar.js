@@ -7,12 +7,16 @@ import {SvgLoop} from "../assets/svg/Loop";
 import {SvgVoice} from "../assets/svg/Voice"; 
 import {SvgPackUp} from "../assets/svg/PackUp"; 
 import {emitter} from "next/client"; 
-import {SvgPlaying} from "../assets/svg/Playing";
+import {SvgPlaying} from "../assets/svg/Playing"; 
+import {SvgQueue} from "../assets/svg/Queue";
 export const BottomBar =(props)=>{
     
     const [state, setState] = useState({
-        IsPlaying:false
-    
+        IsPlaying:false,
+        img:"",
+        title:"",
+        author:"",
+        sid:"",
     })
     const HandleChange=(name,value)=>{
         setState(prevState => ({ ...prevState, [name]: value }))
@@ -29,9 +33,21 @@ export const BottomBar =(props)=>{
       const HandleDurationChange=(value)=>{
           emitter.emit('PlayDuration',{value:value})
       }
-
+      const UpdateCurrentInfo=({img,title,author,sid})=>{
+        HandleChange("img",img)
+        HandleChange("title",title)
+        HandleChange("author",author)
+        HandleChange("sid",sid)
+      }
+      const CutSang=()=>{
+        emitter.emit("DeletePlayQueue",{sid:state.sid})
+      }
+      const PreSang=()=>{
+        
+      }
     
     useEffect(() => {
+        emitter.on("CurrentSangInfo",UpdateCurrentInfo)
         const setupSlider=()=>{
             const slider = document.querySelector("#DurationSlider");
                 if(slider){
@@ -48,21 +64,21 @@ export const BottomBar =(props)=>{
     return (
         <div className={`w-full flex flex-row items-center h-24 justify-between`}>
             <div className={` w-1/4 flex flex-row items-center space-x-3 `}>
-                  <img src={props.url} alt={`img`} className={`w-20 ml-3 h-20 object-cover rounded-2xl`} />
+                  <img src={`http://${state.img}`} alt={`img`} className={`w-20 ml-3 h-20 object-cover rounded-2xl`} />
                   <div className={`flex flex-col space-y-2`}>
-                      <div className={`text-xl`}>{props.title}</div>
-                      <div className={` italic text-sm`}>{props.author}</div>
+                      <div className={`text-xl`}>{state.title}</div>
+                      <div className={` italic text-sm`}>{state.author}</div>
                   </div>      
             </div>
             <div className={`w-1/2 justify-center flex flex-col items-center `}>
                 <div className={`flex flex-row h-12  items-center justify-between w-1/3`}>
                 <SvgPlayQueue className={`hover:scale-110 cursor-pointer`} h={`24`} w={`24`}></SvgPlayQueue>
-                <SvgPreSang className={`hover:scale-110 cursor-pointer`} h={32} w={32}></SvgPreSang>
+                <SvgPreSang onclick={PreSang} className={`hover:scale-110 cursor-pointer`} h={32} w={32}></SvgPreSang>
                 {state.IsPlaying?
                 <SvgStop className={`hover:scale-110 cursor-pointer`} h={32} w={32} onclick={()=>{props.changePlayState();HandleChange("IsPlaying",!state.IsPlaying)}} ></SvgStop>
                     :<SvgPlaying className={`hover:scale-110 cursor-pointer`} h={32} w={32} onclick={()=>{props.changePlayState();HandleChange("IsPlaying",!state.IsPlaying)}}></SvgPlaying>
                 }
-                <SvgNextSang className={`hover:scale-110 cursor-pointer`} h={32} w={32}></SvgNextSang>
+                <SvgNextSang onclick={CutSang} className={`hover:scale-110 cursor-pointer`} h={32} w={32}></SvgNextSang>
                 <SvgLoop className={`hover:scale-110 cursor-pointer`} h={24} w={24}></SvgLoop>
                 </div>
                  <div className={`flex flex-row w-full items-center `}>
@@ -82,8 +98,8 @@ export const BottomBar =(props)=>{
                     <SvgVoice className={`hover:scale-110 cursor-pointer`} w={40} h={40}></SvgVoice>
                     <mdui-slider className={`volume `}></mdui-slider>
                 </div>
-                <div></div>
-                <SvgPackUp  onclick={props.hidden} w={32} h={32} className={`hover:scale-110 cursor-pointer`}></SvgPackUp>
+                <SvgQueue w={`32`} h={`32`} className={`hover:scale-110 cursor-pointer`} onclick={props.handlePlayList}></SvgQueue>
+                <SvgPackUp  onclick={props.hidden} w={`32`} h={`32`} className={`hover:scale-110 cursor-pointer`}></SvgPackUp>
                 <div></div>
             </div>
         </div>

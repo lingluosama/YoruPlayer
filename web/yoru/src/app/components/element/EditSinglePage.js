@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"; 
 import { SvgCancel } from "../../assets/svg/Cancel"; 
-import {$httpFormData, UploadNewSingle} from "../http/fileApi"; 
+import {$httpFormData, UploadNewSingle} from "../http/FormDataApi"; 
 
 export function EditSinglePage(props) {
     const SingleRef = useRef(null);

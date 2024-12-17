@@ -5,7 +5,7 @@ export function TagBottom(props) {
             </button>
     )}else{
         return(
-            <button onClick={props.onclick}  className={`bg-gray-800 text-white rounded-xl w-12`}>
+            <button onClick={props.onclick}  className={`bg-white bg-opacity-15  text-white rounded-xl w-12`}>
                {props.text}
             </button>
         )

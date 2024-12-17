@@ -10,26 +10,37 @@ import { SvgAlbum } from "../assets/svg/Album";
 import { SvgDoubleLeft } from "../assets/svg/DoubleLeft"; 
 import { SvgDoubleRight } from "../assets/svg/DoubleRight"; 
 import { MainPage } from './children/MainPage'; 
-import { PlayPage } from './children/PlayPage'; 
 import withAuth from "../components/withAuth"; 
-import PlayerComponent from "../components/Player"; 
+import PlayerComponent from "../components/element/Player"; 
 import { SvgPackOpen } from "../assets/svg/PackOpen"; 
-import {EditSinglePage} from "../components/element/EditSinglePage"; 
-import {SvgUpload} from "../assets/svg/Upload"; 
-import {EditAlbumPage} from "../components/element/EditAlbumPage"; 
+import { EditSinglePage } from "../components/element/EditSinglePage"; 
+import { SvgUpload } from "../assets/svg/Upload"; 
+import { EditAlbumPage } from "../components/element/EditAlbumPage"; 
+import { TopBar } from "./TopBar"; 
+import { SearchResultPage } from "./children/SearchResultPage"; 
+import { DetailSingleList } from "../components/element/DeatilSingleList"; 
+import {GetPlayQueue} from "../components/http/PlayApi"; 
+import {ListItem} from "../components/element/ListItem"; 
+import {SvgCancel} from "../assets/svg/Cancel"; 
+import {emitter} from "next/client"; 
 
 const Page = () => {
   const [state, setState] = useState({
     drawerOpen: false,
+    PlayListOpen: false,
     displayBottomBar: true,
     bottomBarImg: 'https://th.bing.com/th/id/OIP.3n6ZAf145QCfNTn0bQ_9ZAHaEn?&rs=1&pid=ImgDetMain',
     bottomBarTitle: 'NULL',
     bottomBarAuthor: 'NULL',
     duration: 0,
     totalTime: 0,
-    currentView: 'home'
+    currentView: 'home',
+    searchKeyword:'',
+    listDetail:null,
+    listType:"",
+    PlayQueue:[],
+    targetAuthor:"",
   });
-
   const testurl = "http://localhost:9000/sangs/cardigan.mp3";
   const PlayerRef = useRef(null);
   const bottomBarRef = useRef(null);
@@ -39,30 +50,72 @@ const Page = () => {
   };
 
   const drawerRef = useRef(null);
+  const PlayListRef = useRef(null);
 
   const openDrawer = () => {
     drawerRef.current.open = true;
   };
-
+  const openPlayList = () => {
+      PlayListRef.current.open=true
+    PlayListRef.current.classList.remove('hidden');
+    PlayListRef.current.classList.add('translate-x-0');
+    PlayListRef.current.classList.remove('translate-x-full');
+  };
   const closeDrawer = () => {
     drawerRef.current.open = false;
+  };
+  const closePlayList = () => {
+      PlayListRef.current.open=false
+    PlayListRef.current.classList.add('translate-x-full');
+    PlayListRef.current.classList.remove('translate-x-0');
+    PlayListRef.current.classList.add('hidden');
+  };
+  
+  
+
+  const HandlePlayListOpen = () => {
+    state.PlayListOpen ? closePlayList() : openPlayList();
+    handleState("PlayListOpen", !state.PlayListOpen);
+  };
+  const HandleDrawer=()=>{
+    state.drawerOpen ? closeDrawer() : openDrawer();
+    handleState("drawerOpen", !state.drawerOpen);
+  }
+
+  const GetCallbackToListDetailPage = (data, type) => {
+    handleState("currentView", "list");
+    handleState("listDetail", data);
+    handleState("listType", type);
+    renderComponent();
   };
 
   const renderComponent = () => {
     switch (state.currentView) {
       case 'home':
-        return <MainPage />;
+        return <MainPage golist={GetCallbackToListDetailPage} />;
       case 'play':
         return <PlayPage />;
       case 'album':
-        return  <EditAlbumPage />;   
+        return <EditAlbumPage />;
       case `upload`:
-        return <EditSinglePage create={true}/>  
-      default:
+        return <EditSinglePage create={true} />;
+      case `search`:
+        return <SearchResultPage golist={GetCallbackToListDetailPage} keyword={state.searchKeyword} />;
+      case `list`:
+        return <DetailSingleList name={state.targetAuthor} type={state.listType} album={state.listDetail} sanglist={state.listDetail}></DetailSingleList>;
+      case `list-author`:
+          return <DetailSingleList name={state.targetAuthor} type={`author`}></DetailSingleList>;
+        default:
         return <MainPage />;
     }
   };
-
+  const GetPlayQueueFromPlayer = (data) => {
+      handleState("PlayQueue", data);
+  }
+  useEffect(() => {
+  }, [PlayerRef]);
+  
+  
   const UpdateTime = (value) => {
     const roundedValue = Math.round(value);
     handleState("duration", roundedValue);
@@ -77,7 +130,7 @@ const Page = () => {
       PlayerRef.current.HandleProgress(value);
     }
   };
-
+    
   const ChangePlayState = () => {
     if (PlayerRef.current) {
       PlayerRef.current.ChangePlayState();
@@ -96,70 +149,101 @@ const Page = () => {
 
   const showBottomBar = () => {
     if (bottomBarRef.current) {
-        bottomBarRef.current.classList.add("translate-y-24");
+      bottomBarRef.current.classList.add("translate-y-24");
       bottomBarRef.current.classList.remove("hidden");
       bottomBarRef.current.classList.remove("translate-y-0");
-        setTimeout(() => {
+      setTimeout(() => {
         handleState("displayBottomBar", true);
-        }, 500); 
+      }, 500);
     }
   };
 
   useEffect(() => {
+      emitter.on('GoAuthorDetail',({name})=>{
+          handleState("targetAuthor", name);
+          handleState("currentView", "list-author");
+          renderComponent();
+      } );
     closeDrawer();
+    
   }, []);
 
   return (
-    <div className="max-h-screen min-h-screen w-full flex flex-col">
+     <div className={`w-full max-h-screen flex flex-row-reverse`}> 
+       <div
+         ref={PlayListRef}
+         className={` bg-black  flex-col items-center justify-center hidden w-64 translate-y-0 transition-transform duration-500`}
+       >
+         <SvgCancel onclick={HandlePlayListOpen} className={` hover:bg-white hover:bg-opacity-10 hover:outline-8 hover:outline-white/10 absolute top-2 right-2 hover:scale-110 hover:cursor-pointer`} w={`16`} h={`16`}></SvgCancel>
+         
+         <div className={`w-full mt-2 justify-center items-center text-center`}>播放队列</div>
+         {state.PlayQueue&&state.PlayQueue.map((item, index) => (
+             <ListItem inqueue={true} sid={item.id} displayIndex={false} key={index} length={item.length} src={item.cover} title={item.title} author={item.author} notime={true} noadd={true} wmore={true}  />
+         ))}
+       </div>
+    <div className="h-screen min-h-screen w-full flex flex-col">
+    
       <PlayerComponent
         ref={PlayerRef}
         updateTime={UpdateTime}
         src={testurl}
         getTotalTime={GetTotalTime}
+        queryPlayList={GetPlayQueueFromPlayer}
+      />
+      <TopBar 
+        gohome={() => { handleState("currentView", "home"); renderComponent(); }}
+        onSearch={(keyword) => {
+          handleState("currentView", "search");
+          handleState("searchKeyword", keyword);
+          renderComponent();
+        }}
       />
       <div className="flex-grow w-full flex overflow-auto">
         <div className="flex flex-row h-full w-full">
-          <mdui-navigation-drawer close-on-overlay-click ref={drawerRef} className={`mdui-theme-dark bg-black flex flex-col items-center justify-center w-24 transform ${state.drawerOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-500`}>
-            <NavigationItem name="Home" onClick={() => {handleState('currentView', 'home')}
-            }>
-              <SvgHome w={24} h={24} />
-            </NavigationItem>
+          <mdui-navigation-drawer 
+            close-on-overlay-click 
+            ref={drawerRef} 
+            className={`mdui-theme-dark bg-black flex flex-col items-center justify-center w-24 transform ${state.drawerOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-500`}>
+
             <NavigationItem name="Album" onClick={() => handleState('currentView', 'album')}>
               <SvgAlbum w={24} h={24} />
             </NavigationItem>
-            <NavigationItem name={`Upload`} onClick={() => {handleState('currentView', 'upload')}}>
-                <SvgUpload w={24} h={24} />
+            <NavigationItem name={`Upload`} onClick={() => { handleState('currentView', 'upload'); }}>
+              <SvgUpload w={24} h={24} />
             </NavigationItem>
-            
+            <NavigationItem name={`Author`} onClick={() => { handleState('currentView', 'author'); }}>
+              <SvgUpload w={24} h={24} />
+            </NavigationItem>
           </mdui-navigation-drawer>
           <mdui-button
             className="absolute top-1/2"
-            onClick={() => {
-              state.drawerOpen ? closeDrawer() : openDrawer();
-              handleState("drawerOpen", !state.drawerOpen);
-            }}>
+            onClick={HandleDrawer}>
             {state.drawerOpen ? <SvgDoubleLeft w={32} h={32} /> : <SvgDoubleRight w={32} h={32} />}
           </mdui-button>
           <div className="flex-grow overflow-y-auto">
             {renderComponent()}
           </div>
+
         </div>
       </div>
-        <div ref={bottomBarRef} className={`${state.displayBottomBar?``:`hidden`} w-full bg-green-500 h-24 translate-y-0 transition-transform duration-500`}>
-          <BottomBar
-            url={state.bottomBarImg}
-            author={state.bottomBarAuthor}
-            title={state.bottomBarTitle}
-            total={state.totalTime}
-            duration={state.duration}
-            changePlayState={ChangePlayState}
-            hidden={hideBottomBar}
-            handleProgress={HandleProgress}
-          />
-        </div>
-        <div className={`${state.displayBottomBar?`hidden`:``}   w-full flex flex-col items-center justify-center `}>
-          <SvgPackOpen w="32" h="32" className="cursor-pointer" onclick={showBottomBar} />
-        </div>
+      
+      <div ref={bottomBarRef} className={`${state.displayBottomBar ? `` : `hidden`} w-full bg-white bg-opacity-5 h-24 translate-y-0 transition-transform duration-500`}>
+        <BottomBar
+          url={state.bottomBarImg}
+          author={state.bottomBarAuthor}
+          title={state.bottomBarTitle}
+          total={state.totalTime}
+          duration={state.duration}
+          changePlayState={ChangePlayState}
+          hidden={hideBottomBar}
+          handleProgress={HandleProgress}
+          handlePlayList={HandlePlayListOpen}
+        />
+      </div>
+      <div className={`${state.displayBottomBar ? `hidden` : ``} w-full flex flex-col items-center justify-center`}>
+        <SvgPackOpen className={`absolute bottom-0 hover:cursor-pointer ` } w={`32`} h={`32`} onclick={showBottomBar} />
+      </div>
+    </div>
     </div>
   );
 };

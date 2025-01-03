@@ -102,19 +102,27 @@ const PlayerComponent = forwardRef((props, ref) => {
       }, 500); 
     }
   };
+  const HandleVolumeChange=({value})=>{
+      audioRef.current.volume = value/100;
+  }
 
   useEffect(() => {
     calculateDuration();
+    
     emitter.on('PlayDuration', HandleProgress);
     emitter.on('AddPlayQueue', AddToPlayQueue);
     emitter.on('DeletePlayQueue',DeleteFormPlayQueue);
+    emitter.on(`ChangeVolume`,HandleVolumeChange);
+    if(audioRef.current){audioRef.current.volume=localStorage.getItem("volume")/100;}
     return () => {
       emitter.off('PlayDuration', HandleProgress);
       emitter.off('AddPlayQueue', AddToPlayQueue);
       emitter.off('DeletePlayQueue',DeleteFormPlayQueue);
+      
     };
   }, [props.src]);
   useEffect(() => {
+      
       const fetchData=async ()=>{
   	   await FetchPlayQueue();
       }

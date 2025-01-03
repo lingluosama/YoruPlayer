@@ -8,7 +8,8 @@ import {SvgVoice} from "../assets/svg/Voice";
 import {SvgPackUp} from "../assets/svg/PackUp"; 
 import {emitter} from "next/client"; 
 import {SvgPlaying} from "../assets/svg/Playing"; 
-import {SvgQueue} from "../assets/svg/Queue";
+import {SvgQueue} from "../assets/svg/Queue"; 
+import {GetUserInfo} from "../components/http/userApi";
 export const BottomBar =(props)=>{
     
     const [state, setState] = useState({
@@ -17,6 +18,8 @@ export const BottomBar =(props)=>{
         title:"",
         author:"",
         sid:"",
+        volume:50,
+        current_user:null
     })
     const HandleChange=(name,value)=>{
         setState(prevState => ({ ...prevState, [name]: value }))
@@ -33,6 +36,13 @@ export const BottomBar =(props)=>{
       const HandleDurationChange=(value)=>{
           emitter.emit('PlayDuration',{value:value})
       }
+      
+      const HandleVolumeChange=(value)=>{
+        HandleChange("volume",value)
+        localStorage.setItem("volume",value);
+        emitter.emit('ChangeVolume',{value:value})
+      }
+      
       const UpdateCurrentInfo=({img,title,author,sid})=>{
         HandleChange("img",img)
         HandleChange("title",title)
@@ -45,6 +55,7 @@ export const BottomBar =(props)=>{
       const PreSang=()=>{
         
       }
+      
     
     useEffect(() => {
         emitter.on("CurrentSangInfo",UpdateCurrentInfo)
@@ -55,7 +66,8 @@ export const BottomBar =(props)=>{
                 }
         }
         setupSlider()
-        
+        var volume = localStorage.getItem("volume");
+        if(volume)HandleChange("volume",volume)
     }, []);
     
     
@@ -96,7 +108,11 @@ export const BottomBar =(props)=>{
             <div className={`w-1/4 flex flex-row items-center justify-between `}>
                 <div className={`flex  w-1/3`}>
                     <SvgVoice className={`hover:scale-110 cursor-pointer`} w={40} h={40}></SvgVoice>
-                    <mdui-slider className={`volume `}></mdui-slider>
+                    <mdui-slider 
+                    className={`volume`}
+                    value={state.volume}
+                    onChange={(e)=>HandleVolumeChange(e.target.value)}
+                    ></mdui-slider>
                 </div>
                 <SvgQueue w={`32`} h={`32`} className={`hover:scale-110 cursor-pointer`} onclick={props.handlePlayList}></SvgQueue>
                 <SvgPackUp  onclick={props.hidden} w={`32`} h={`32`} className={`hover:scale-110 cursor-pointer`}></SvgPackUp>

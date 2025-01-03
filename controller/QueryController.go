@@ -96,7 +96,44 @@ func QueryList(c context.Context, req *app.RequestContext) {
 			}
 
 		}
+	case "tag":
+		{
+			tags, count, err := service.QueryTagList(c, begin, size, &keyword)
+			if err != nil {
+				req.JSON(http.StatusBadRequest, models.BaseResponse{
+					Msg:  "service err:" + err.Error(),
+					Data: nil,
+				})
+			} else {
+				req.JSON(http.StatusOK, response.QueryListRes{
+					Msg:    "Ac",
+					Data:   tags,
+					Length: count,
+				})
+			}
+		}
 	}
+}
+func GetAlbumInfoByTitle(c context.Context, req *app.RequestContext) {
+	title := req.Query("title")
+	Album, err := query.Album.WithContext(c).Where(query.Album.Title.Eq(title)).First()
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "query err:" + err.Error(),
+		})
+	}
+	album := response.Album{
+		Id:          strconv.FormatInt(Album.Id, 10),
+		Title:       Album.Title,
+		Cover:       Album.Cover,
+		Author:      Album.Author,
+		Description: Album.Description,
+	}
+	req.JSON(http.StatusOK, models.BaseResponse{
+		Msg:  "Ac",
+		Data: album,
+	})
+
 }
 
 func GetAlbumDetail(c context.Context, req *app.RequestContext) {

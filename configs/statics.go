@@ -9,6 +9,7 @@ const (
 	PORT     = "3306"
 	DbName   = "Yoru"
 )
+const DefaultUserAvatar = MinIOEndPoint + `/user-avatar/default`
 
 func GetDBInfo() string {
 	return DbUser + ":" + DbPasswd + "@tcp(" + DbUrl + ":" + PORT + ")/" + DbName + "?charset=utf8mb4&parseTime=True&loc=Local"

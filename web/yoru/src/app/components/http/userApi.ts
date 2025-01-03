@@ -21,3 +21,24 @@ export const UserRegister = (data: {
     )    
     
 }
+export const GetUserInfo=(data:{
+    uid:string
+})=>{
+    return $http(
+        "GET",
+        "/user/info",
+        data,
+        false
+    )
+    
+}
+export const GetUserSangList=(data:{
+    uid:string,
+})=>{
+    return $http(
+        "GET",
+        "/user/sanglist",
+        data,
+        false
+    )
+}

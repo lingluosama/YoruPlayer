@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react"; 
 import { GetAlbumDetail, GetAuthorPage, GetSangListDetail, GeyAuthorByName } from "../http/queryApi"; 
 import { getColorFromImage } from "mdui"; 
-import { ListItem } from "./ListItem"; 
+import { ListItem } from "../layouts/ListItem"; 
 import { $httpFormData } from "../http/FormDataApi"; 
+import {SvgCancel} from "../../assets/svg/Cancel"; 
 
 export function DetailSingleList(props) {
     const imgRef = useRef(null);
@@ -123,18 +124,18 @@ export function DetailSingleList(props) {
     }, [state.cover]);
 
       return (
-        <div className="m-8 rounded-2xl min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(${state.color}, transparent)` }}>
-            <div className="w-full h-64 m-8 flex flex-row space-x-5">
+        <div className=" m-8 p-8 space-y-5 rounded-2xl min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(${state.color}, transparent)` }}>
+            <div className="w-full h-64   flex flex-row space-x-5">
                 <img 
                     ref={imgRef} 
                     src={`http://${state.cover}`}
                     alt="img"
                     crossOrigin="anonymous"
-                    className="h-64 w-64 object-cover rounded-2xl"
+                    className="h-64 w-64 object-cover rounded-2xl shadow-2xl"
                 />
                 <div className="flex w-4/5 flex-col justify-end space-y-3">
                     <div className="text-2xl">{state.type}</div>
-                    <div className="text-white text-7xl flex overflow-hidden w-4/5 whitespace-nowrap text-overflow-ellipsis">{state.title}</div>
+                    <div className="text-white text-7xl  flex   w-4/5 whitespace-nowrap text-overflow-ellipsis truncate">{state.title}</div>
                     {state.type === "专辑" && <div className="">{state.description}</div>}
                     {state.type === "专辑" && (
                         <div className="w-full flex flex-row">
@@ -144,8 +145,8 @@ export function DetailSingleList(props) {
                     )}
                 </div>
             </div>
-            <div className="ml-8 mr-8 flex flex-row justify-between">
-                <div className="w-2/3 ml-8 flex flex-row">
+            <div className=" flex flex-row justify-between">
+                <div className="w-2/3 ml-3 flex flex-row">
                     <div className="text-xl font-bold">#</div>
                     <div className="text-xl ml-10">标题</div>
                 </div>
@@ -156,8 +157,8 @@ export function DetailSingleList(props) {
                     <div className="w-1/3"></div>
                 </div>
             </div>
-            <mdui-divider className="ml-8 mr-8"></mdui-divider>   
-            <div className="flex flex-col ml-8 mr-8 bg-opacity-5">
+            <mdui-divider className=""></mdui-divider>   
+            <div className="flex flex-col bg-opacity-5">
                 {state.sanglist && state.sanglist.map((item, index) => (
                     <ListItem
                         insanglist={true}
@@ -175,5 +176,32 @@ export function DetailSingleList(props) {
                 ))}
             </div>
         </div>
+        
     );
+}
+
+export function SangTag(props){
+    const [state, setState] = useState({
+        ishover:false
+    })
+    const handleState=(name,value)=>{
+        setState(prevState =>({...prevState, [name]: value }))
+    }
+    
+    return(
+        <div className={`w-16 h-8 p-3 bg-gray-700 relative z-10 rounded-3xl flex justify-center flex-row items-center`} 
+             onMouseOver={()=>handleState("ishover",true)}
+             onMouseLeave={()=>handleState("ishover",false)}
+             >
+            <div className={`w-full flex flex-row items-center justify-center`}>
+                <div className={``}>{props.context}</div>
+            </div>
+            {state.ishover&&
+               <div className={`w-full flex h-full justify-center absolute bg-gray-500  items-center rounded-3xl`}>
+                   <SvgCancel w={`16`} h={`16`}></SvgCancel>
+               </div>         
+            }
+
+        </div>
+    )
 }

@@ -102,3 +102,26 @@ func DeleteFormQueue(c context.Context, req *app.RequestContext) {
 	})
 
 }
+
+func GetUserPlayHistory(c context.Context, req *app.RequestContext) {
+	Uid := req.Query("uid")
+	uid, err := strconv.ParseInt(Uid, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed to trans int in uid:" + err.Error(),
+		})
+		return
+	}
+	history, err := service.QueryHistory(c, uid)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "service err:" + err.Error(),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, models.BaseResponse{
+		Msg:  "Ac",
+		Data: history,
+	})
+
+}

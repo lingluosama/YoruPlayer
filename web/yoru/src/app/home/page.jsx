@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import 'mdui/mdui.css';
 import '@mdui/icons/search.js';
 import 'mdui'; 
-import { NavigationItem } from "./NavigationItem"; 
+import { NavigationItem } from "../components/layouts/NavigationItem"; 
 import { BottomBar } from "./BottomBar"; 
 import { SvgHome } from "../assets/svg/Home";
 import { SvgAlbum } from "../assets/svg/Album"; 
@@ -11,18 +11,20 @@ import { SvgDoubleLeft } from "../assets/svg/DoubleLeft";
 import { SvgDoubleRight } from "../assets/svg/DoubleRight"; 
 import { MainPage } from './children/MainPage'; 
 import withAuth from "../components/withAuth"; 
-import PlayerComponent from "../components/element/Player"; 
+import PlayerComponent from "../components/layouts/Player"; 
 import { SvgPackOpen } from "../assets/svg/PackOpen"; 
-import { EditSinglePage } from "../components/element/EditSinglePage"; 
+import { EditSinglePage } from "../components/pages/EditSinglePage"; 
 import { SvgUpload } from "../assets/svg/Upload"; 
-import { EditAlbumPage } from "../components/element/EditAlbumPage"; 
+import { EditAlbumPage } from "../components/pages/EditAlbumPage"; 
 import { TopBar } from "./TopBar"; 
 import { SearchResultPage } from "./children/SearchResultPage"; 
-import { DetailSingleList } from "../components/element/DeatilSingleList"; 
+import { DetailSingleList } from "../components/pages/DeatilSingleList"; 
 import {GetPlayQueue} from "../components/http/PlayApi"; 
-import {ListItem} from "../components/element/ListItem"; 
+import {ListItem} from "../components/layouts/ListItem"; 
 import {SvgCancel} from "../assets/svg/Cancel"; 
 import {emitter} from "next/client"; 
+import {GetAlbumInfoByTitle} from "../components/http/queryApi"; 
+import {UserHomePage} from "../components/pages/UserHomePage"; 
 
 const Page = () => {
   const [state, setState] = useState({
@@ -71,7 +73,10 @@ const Page = () => {
     PlayListRef.current.classList.add('hidden');
   };
   
-  
+  const GoToUserHome=()=>{
+      handleState("currentView","user-home")
+      renderComponent()
+  }
 
   const HandlePlayListOpen = () => {
     state.PlayListOpen ? closePlayList() : openPlayList();
@@ -96,7 +101,7 @@ const Page = () => {
       case 'play':
         return <PlayPage />;
       case 'album':
-        return <EditAlbumPage />;
+        return <EditAlbumPage create={true} />;
       case `upload`:
         return <EditSinglePage create={true} />;
       case `search`:
@@ -105,6 +110,8 @@ const Page = () => {
         return <DetailSingleList name={state.targetAuthor} type={state.listType} album={state.listDetail} sanglist={state.listDetail}></DetailSingleList>;
       case `list-author`:
           return <DetailSingleList name={state.targetAuthor} type={`author`}></DetailSingleList>;
+      case  `user-home`:
+          return <UserHomePage></UserHomePage>
         default:
         return <MainPage />;
     }
@@ -130,6 +137,7 @@ const Page = () => {
       PlayerRef.current.HandleProgress(value);
     }
   };
+  
     
   const ChangePlayState = () => {
     if (PlayerRef.current) {
@@ -164,6 +172,10 @@ const Page = () => {
           handleState("currentView", "list-author");
           renderComponent();
       } );
+      emitter.on("GoAlbumDetail",async ({title})=>{
+            const res = await GetAlbumInfoByTitle({title:title});
+            GetCallbackToListDetailPage(res.data,"album")
+      })
     closeDrawer();
     
   }, []);
@@ -182,14 +194,6 @@ const Page = () => {
          ))}
        </div>
     <div className="h-screen min-h-screen w-full flex flex-col">
-    
-      <PlayerComponent
-        ref={PlayerRef}
-        updateTime={UpdateTime}
-        src={testurl}
-        getTotalTime={GetTotalTime}
-        queryPlayList={GetPlayQueueFromPlayer}
-      />
       <TopBar 
         gohome={() => { handleState("currentView", "home"); renderComponent(); }}
         onSearch={(keyword) => {
@@ -197,6 +201,14 @@ const Page = () => {
           handleState("searchKeyword", keyword);
           renderComponent();
         }}
+        onclickAvatar={GoToUserHome}
+      />
+      <PlayerComponent
+        ref={PlayerRef}
+        updateTime={UpdateTime}
+        src={testurl}
+        getTotalTime={GetTotalTime}
+        queryPlayList={GetPlayQueueFromPlayer}
       />
       <div className="flex-grow w-full flex overflow-auto">
         <div className="flex flex-row h-full w-full">

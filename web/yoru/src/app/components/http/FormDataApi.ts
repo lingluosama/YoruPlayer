@@ -1,4 +1,4 @@
-const BaseUrl = "http://localhost:8888"; // Add "http://" or "https://"
+const BaseUrl = "/api"; // Add "http://" or "https://"
 
 export const $httpFormData = async (data: FormData, url: string) => {
     let headers: Record<string, string> = {};

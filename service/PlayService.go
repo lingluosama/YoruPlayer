@@ -12,6 +12,52 @@ import (
 func GetPlayQueueKey(uid int64) string {
 	return "playQueue_" + strconv.FormatInt(uid, 10)
 }
+func GetPlayHistoryKey(uid int64) string {
+	return "playHistory_" + strconv.FormatInt(uid, 10)
+}
+func AddToHistory(c context.Context, uid int64, sang Db.Single) error {
+	key := GetPlayHistoryKey(uid)
+	cmd := RedisUtils.R.Exists(c, key)
+	exists, err := cmd.Result()
+	if err != nil {
+		return err
+	}
+	var NewRecord cache.HistoryMessage
+	NewRecord.Single = sang
+	tags, err := GetSingleTag(c, sang.Id)
+	if err != nil {
+		return err
+	}
+	NewRecord.Single = sang
+	NewRecord.Tags = tags
+	var PlayHistory cache.PlayHistory
+	if exists > 0 {
+		err := RedisUtils.GetValue(c, key, &PlayHistory)
+		if err != nil {
+			return err
+		}
+		PlayHistory.Messages = append(PlayHistory.Messages, &NewRecord)
+		RedisUtils.SetValue(c, key, PlayHistory)
+	} else {
+		PlayHistory.Uid = uid
+		PlayHistory.Messages = make([]*cache.HistoryMessage, 0)
+		PlayHistory.Messages = append(PlayHistory.Messages, &NewRecord)
+
+		RedisUtils.SetValue(c, key, PlayHistory)
+	}
+	return nil
+}
+
+func QueryHistory(c context.Context, uid int64) (*cache.PlayHistory, error) {
+	key := GetPlayHistoryKey(uid)
+	var PlayHistory cache.PlayHistory
+	err := RedisUtils.GetValue(c, key, &PlayHistory)
+	if err != nil {
+		return nil, err
+	}
+	return &PlayHistory, nil
+
+}
 
 func QueryQueue(c context.Context, uid int64) (*cache.PlayList, error) {
 	key := GetPlayQueueKey(uid)
@@ -99,13 +145,18 @@ func DeleteFromQueue(c context.Context, uid int64, sid int64) error {
 			return err
 		}
 		for i, single := range list.SangList {
+
+			if i == 0 {
+				err = AddToHistory(c, uid, list.SangList[i])
+			}
 			if single.Id == sid {
 				list.SangList = append(list.SangList[:i], list.SangList[i+1:]...)
 			}
+
 		}
 		RedisUtils.SetValue(c, key, list)
 	} else {
 		return errors.New("请先开始播放")
 	}
-	return nil
+	return err
 }

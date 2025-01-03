@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"; 
 import { QueryList } from "../../components/http/queryApi"; 
-import { TagBottom } from "./element/TagButtom"; 
-import { ListItem } from "../../components/element/ListItem"; 
-import {PageIndexer} from "../../components/element/PageIndexer"; 
-import {RowCircleItem} from "../../components/element/RowCircleItem"; 
-import {RowCardItem} from "../../components/element/RowCardItem"; 
+import { TagBottom } from "../../components/layouts/TagButtom"; 
+import { ListItem } from "../../components/layouts/ListItem"; 
+import {PageIndexer} from "../../components/layouts/PageIndexer"; 
+import {RowCircleItem} from "../../components/layouts/RowCircleItem"; 
+import {RowCardItem} from "../../components/layouts/RowCardItem"; 
 import {$httpFormData} from "../../components/http/FormDataApi"; 
 
 export function SearchResultPage(props) {
@@ -149,7 +149,7 @@ export function SearchResultPage(props) {
                         <div className={`text-4xl`}>歌曲</div>
                         <div className={`h-80`}>
                             {state.single_list&&state.single_list.slice(state.single_offset, state.single_offset + 4).map((item, index) => (
-                                <ListItem sid={item.id} id={item.id} displayIndex={false} key={index} length={item.length} src={item.cover} title={item.title} author={item.author} album={state.single_album_name[index]}  />
+                                <ListItem sid={item.id} id={item.id} displayIndex={false} key={index} length={item.length} src={item.cover} title={item.title} author={item.author} album={state.single_album_name[state.single_offset+index]}  />
                             ))}
                         </div>
                         <PageIndexer
@@ -177,7 +177,7 @@ export function SearchResultPage(props) {
                     <div className={`w-full flex flex-row justify-between`}>
                     {
                        state.sanglist_list&&state.sanglist_list.slice(state.sanglist_offset, state.sanglist_offset + 5).map((item, index) => (
-                            <RowCardItem  onClick={()=>{GoToListDetail(index)}} key={index} name={item.title} src={item.cover}></RowCardItem>
+                            <RowCardItem   onClick={()=>{GoToListDetail(index)}} key={index} name={item.title} src={item.cover}></RowCardItem>
                         ))
                     }
                     </div>                            

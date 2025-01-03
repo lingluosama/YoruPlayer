@@ -173,6 +173,10 @@ func AddSingleToAlbum(aid int64, sid int64, c context.Context) error {
 	}
 	return nil
 }
+func DeleteSingleFormAlbum(sid int64, c context.Context) error {
+	_, err := query.Single.WithContext(c).Where(query.Single.Id.Eq(sid)).Updates(Db.Single{AlbumId: 114514})
+	return err
+}
 
 func CreateAuthor(c context.Context, name string, header *multipart.FileHeader) error {
 	id, err := GenSnowFlakeId(6)
@@ -203,4 +207,55 @@ func CreateAuthor(c context.Context, name string, header *multipart.FileHeader) 
 	}
 	return nil
 
+}
+
+func UpdateAuthor(c context.Context, name string, id int64, header *multipart.FileHeader) error {
+	Oriauthor, err := query.Author.WithContext(c).Where(query.Author.Id.Eq(id)).First()
+	if err != nil {
+		return err
+	}
+
+	var Avatar *string
+	Avatar = nil
+	if header != nil {
+		ext := filepath.Ext(header.Filename)
+		if ext == "" {
+			ext = ".png"
+		}
+		open, err := header.Open()
+		if err != nil {
+			return err
+		}
+		objectName := strconv.FormatInt(id, 10) + ext
+		err = MinioUtils.PutFile(c, "author-avatar", objectName, open, header)
+		if err != nil {
+			return err
+		}
+		avatar := configs.MinIOEndPoint + "/author-avatar/" + objectName
+		Avatar = &avatar
+	}
+
+	updateData := map[string]interface{}{
+		"Name": name,
+	}
+	if Avatar != nil {
+		updateData["Avatar"] = *Avatar
+	}
+
+	_, err = query.Author.WithContext(c).Where(query.Author.Id.Eq(id)).Updates(updateData)
+	if err != nil {
+		return err
+	}
+
+	_, err = query.Album.WithContext(c).Where(query.Album.Author.Eq(Oriauthor.Name)).Updates(Db.Album{Author: name})
+	if err != nil {
+		return err
+	}
+
+	_, err = query.Single.WithContext(c).Where(query.Single.Author.Eq(Oriauthor.Name)).Updates(Db.Single{Author: name})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

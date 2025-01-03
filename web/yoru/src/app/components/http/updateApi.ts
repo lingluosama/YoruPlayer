@@ -4,8 +4,19 @@ export const AddSingleToAlbum=(data:{
     sid:string
 })=>{
     return $http(
-        "GET",
-        "/file/add/album",
+        "POST",
+        "/file/album/add",
+        data,
+        false
+    )    
+}
+
+export const DeleteSingleFromAlbum=(data:{
+    sid:string
+})=>{
+    return $http(
+        "Post",
+        "/file/album/delete",
         data,
         false
     )    

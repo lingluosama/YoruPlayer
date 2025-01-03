@@ -21,7 +21,9 @@ var (
 	Author     *author
 	SangList   *sangList
 	SangToList *sangToList
+	SangToTag  *sangToTag
 	Single     *single
+	Tag        *tag
 	User       *user
 )
 
@@ -31,7 +33,9 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Author = &Q.Author
 	SangList = &Q.SangList
 	SangToList = &Q.SangToList
+	SangToTag = &Q.SangToTag
 	Single = &Q.Single
+	Tag = &Q.Tag
 	User = &Q.User
 }
 
@@ -42,7 +46,9 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Author:     newAuthor(db, opts...),
 		SangList:   newSangList(db, opts...),
 		SangToList: newSangToList(db, opts...),
+		SangToTag:  newSangToTag(db, opts...),
 		Single:     newSingle(db, opts...),
+		Tag:        newTag(db, opts...),
 		User:       newUser(db, opts...),
 	}
 }
@@ -54,7 +60,9 @@ type Query struct {
 	Author     author
 	SangList   sangList
 	SangToList sangToList
+	SangToTag  sangToTag
 	Single     single
+	Tag        tag
 	User       user
 }
 
@@ -67,7 +75,9 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Author:     q.Author.clone(db),
 		SangList:   q.SangList.clone(db),
 		SangToList: q.SangToList.clone(db),
+		SangToTag:  q.SangToTag.clone(db),
 		Single:     q.Single.clone(db),
+		Tag:        q.Tag.clone(db),
 		User:       q.User.clone(db),
 	}
 }
@@ -87,7 +97,9 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Author:     q.Author.replaceDB(db),
 		SangList:   q.SangList.replaceDB(db),
 		SangToList: q.SangToList.replaceDB(db),
+		SangToTag:  q.SangToTag.replaceDB(db),
 		Single:     q.Single.replaceDB(db),
+		Tag:        q.Tag.replaceDB(db),
 		User:       q.User.replaceDB(db),
 	}
 }
@@ -97,7 +109,9 @@ type queryCtx struct {
 	Author     IAuthorDo
 	SangList   ISangListDo
 	SangToList ISangToListDo
+	SangToTag  ISangToTagDo
 	Single     ISingleDo
+	Tag        ITagDo
 	User       IUserDo
 }
 
@@ -107,7 +121,9 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Author:     q.Author.WithContext(ctx),
 		SangList:   q.SangList.WithContext(ctx),
 		SangToList: q.SangToList.WithContext(ctx),
+		SangToTag:  q.SangToTag.WithContext(ctx),
 		Single:     q.Single.WithContext(ctx),
+		Tag:        q.Tag.WithContext(ctx),
 		User:       q.User.WithContext(ctx),
 	}
 }

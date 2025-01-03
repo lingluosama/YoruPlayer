@@ -51,3 +51,7 @@ body {
 .transition-transform {
   transition: transform 0.3s, visibility 0.5s;
 }
+
+.bg-deep-gary{
+  background: #313131;
+}

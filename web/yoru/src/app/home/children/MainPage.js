@@ -1,7 +1,7 @@
-import { TagBottom } from "./element/TagButtom";
+import { TagBottom } from "../../components/layouts/TagButtom";
 import { useEffect, useState } from "react";
 import { QueryList } from "../../components/http/queryApi"; 
-import { TowRowStripDisplayer } from "../../components/element/TowRowStripDisplayer";
+import { TowRowStripDisplayer } from "../../components/layouts/TowRowStripDisplayer";
 
 export function MainPage(props) {
     const Tags = ["单曲", "专辑", "歌单"];

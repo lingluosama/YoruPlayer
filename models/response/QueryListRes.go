@@ -16,7 +16,7 @@ type Album struct {
 type SangList struct {
 	Id      string `gorm:"primaryKey;column:id" json:"id"`
 	Cover   string `grom:"column:id" json:"cover"`
-	Creater int64  `gorm:"column:creater" json:"creater"`
+	Creater string `gorm:"column:creater" json:"creater"`
 	Title   string `gorm:"column:title" json:"title"`
 }
 type Author struct {
@@ -40,4 +40,9 @@ type User struct {
 	Avatar    string `gorm:"column:avatar" json:"avatar"`
 	Signature string `gorm:"column:signature" json:"signature"`
 	Email     string `gorm:"column:email" json:"email"`
+}
+
+type Tag struct {
+	Id   string `gorm:"primaryKey;column:id" json:"id"`
+	Name string `gorm:"column:name" json:"name"`
 }

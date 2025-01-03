@@ -123,5 +123,66 @@ func AddSingleToSangList(c context.Context, req *app.RequestContext) {
 	req.JSON(http.StatusOK, models.BaseResponse{
 		Msg: "Has sent",
 	})
+}
+func UpdateUserInfo(c context.Context, req *app.RequestContext) {
+	Uid := req.FormValue("uid")
+	uid, err := strconv.ParseInt(string(Uid), 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed trans uid:" + err.Error(),
+		})
+		return
+	}
+	email := req.FormValue("email")
+	name := req.FormValue("name")
+	signature := req.FormValue("signature")
+	file, err := req.FormFile("avatar")
+	if err != nil && err.Error() == "http: no such file" {
+		file = nil
+	} else if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Get file panic: " + err.Error(),
+			Data: nil,
+		})
+		return
+	}
+	err = service.UpdateUserInfo(
+		c,
+		uid,
+		string(name),
+		string(email),
+		string(signature),
+		file)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "service err" + err.Error(),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, models.BaseResponse{
+		Msg: "Ac",
+	})
+	return
+}
 
+func GetUserSangList(c context.Context, req *app.RequestContext) {
+	Uid := req.Query("uid")
+	uid, err := strconv.ParseInt(Uid, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed trans uid:" + err.Error(),
+		})
+		return
+	}
+	sangList, err := service.GetUserSangList(c, uid)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "service err" + err.Error(),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, models.BaseResponse{
+		Msg:  "Ac",
+		Data: sangList,
+	})
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func InitController() *server.Hertz {
-	h := server.New(server.WithMaxRequestBodySize(100 * 1024 * 1024)) // 将最大请求体大小设置为 10MB
+	h := server.New(server.WithMaxRequestBodySize(100 * 1024 * 1024)) // 将最大请求体大小设置为 100MB
 	h.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
@@ -28,14 +28,18 @@ func InitController() *server.Hertz {
 	userGroup.POST("/register", UserRegister)
 	userGroup.POST("/create/sanglist", CreateSangList)
 	userGroup.POST("/sanglist/add", AddSingleToSangList)
+	userGroup.POST("/update", UpdateUserInfo)
+	userGroup.GET("/sanglist", GetUserSangList)
 
 	fileGroup := h.Group("/file")
 	fileGroup.POST("/single", middleware.JwtAuth(), UploadSingleSang)
 	fileGroup.POST("/album", middleware.JwtAuth(), CreateAlbum)
 	fileGroup.POST("/update/single", middleware.JwtAuth(), UpdateSingleInfo)
 	fileGroup.POST("/update/album", middleware.JwtAuth(), UpdateAlbumInfo)
-	fileGroup.POST("/add/album", middleware.JwtAuth(), AddSingleToAlbum)
+	fileGroup.POST("/album/add", middleware.JwtAuth(), AddSingleToAlbum)
+	fileGroup.POST("/album/delete", middleware.JwtAuth(), DeleteSingleFormAlbum)
 	fileGroup.POST("/author", UploadNewAuthorInfo)
+	fileGroup.POST("/update/author", UpdateAuthorInfo)
 
 	queryGroup := h.Group("/query")
 	queryGroup.GET("/single/message", GetSingleDetail)
@@ -43,13 +47,23 @@ func InitController() *server.Hertz {
 	queryGroup.GET("/album/message", GetAlbumDetail)
 	queryGroup.GET("/sanglist/message", GetSangListDetail)
 	queryGroup.GET("/author/name", QueryAuthorByName)
-	queryGroup.POST("album/names", QueryAlbumNameWithIds)
+	queryGroup.POST("/album/names", QueryAlbumNameWithIds)
 	queryGroup.GET("/author/message", GetAuthorDetail)
+	queryGroup.GET("/album/bytitle", GetAlbumInfoByTitle)
 
 	playGroup := h.Group("/play")
 	playGroup.GET("/query", middleware.JwtAuth(), QueryQueue)
 	playGroup.POST("/add", middleware.JwtAuth(), AddPlayListQueue)
 	playGroup.POST("/delete", middleware.JwtAuth(), DeleteFormQueue)
+	playGroup.GET("/history", GetUserPlayHistory)
+
+	recGroup := h.Group("/recommend")
+	recGroup.POST("/tag/add", AddTagForSang)
+	recGroup.GET("/tags", GetTags)
+	recGroup.GET("/tag/single", GetSingleTags)
+	recGroup.POST("/tag/create", CreateNewTag)
+	recGroup.POST("/tag/drop", DropTagFromSang)
+	recGroup.POST("/tag/erase", EraseTag)
 
 	err := h.Run()
 	if err != nil {

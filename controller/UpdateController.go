@@ -168,6 +168,26 @@ func AddSingleToAlbum(c context.Context, req *app.RequestContext) {
 			Msg: "Ac",
 		})
 	}
+}
+func DeleteSingleFormAlbum(c context.Context, req *app.RequestContext) {
+	sid, err := strconv.Atoi(req.Query("sid"))
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "transfer sid to int failed:" + err.Error(),
+		})
+		return
+	}
+	err = service.DeleteSingleFormAlbum(int64(sid), c)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "Service err:" + err.Error(),
+		})
+		return
+	} else {
+		req.JSON(http.StatusOK, models.BaseResponse{
+			Msg: "Ac",
+		})
+	}
 
 }
 
@@ -185,6 +205,40 @@ func UploadNewAuthorInfo(c context.Context, req *app.RequestContext) {
 	}
 	name := req.FormValue("name")
 	err = service.CreateAuthor(c, string(name), file)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "service err:" + err.Error(),
+			Data: nil,
+		})
+	} else {
+		req.JSON(http.StatusOK, models.BaseResponse{
+			Msg:  "Ac",
+			Data: nil,
+		})
+	}
+}
+
+func UpdateAuthorInfo(c context.Context, req *app.RequestContext) {
+	file, err := req.FormFile("avatar")
+	if err != nil && err.Error() == "http: no such file" {
+		file = nil
+	} else if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Get file panic: " + err.Error(),
+			Data: nil,
+		})
+		return
+	}
+	Id := req.FormValue("id")
+	id, err := strconv.ParseInt(string(Id), 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "trans id to int64 failed:" + err.Error(),
+			Data: nil,
+		})
+	}
+	name := req.FormValue("name")
+	err = service.UpdateAuthor(c, string(name), id, file)
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
 			Msg:  "service err:" + err.Error(),

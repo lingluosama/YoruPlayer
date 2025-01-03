@@ -1,12 +1,15 @@
 package service
 
 import (
+	"YoruPlayer/configs"
 	"YoruPlayer/entity/Db"
 	"YoruPlayer/models/response"
 	"YoruPlayer/service/query"
 	"context"
 	"errors"
 	"log"
+	"mime/multipart"
+	"path/filepath"
 	"strconv"
 )
 
@@ -26,7 +29,18 @@ func UserLogin(c context.Context, name string, password string) (*response.UserL
 	return res, nil
 }
 
-func GetUserInfo(c context.Context, uid string) (*Db.User, error) {
+func ConverseUserToResponse(user *Db.User) response.User {
+	return response.User{
+		Id:        strconv.FormatInt(user.Id, 10),
+		Name:      user.Name,
+		Password:  user.Password,
+		Avatar:    user.Avatar,
+		Signature: user.Signature,
+		Email:     user.Email,
+	}
+}
+
+func GetUserInfo(c context.Context, uid string) (*response.User, error) {
 	u := query.User
 	id, err := strconv.ParseInt(uid, 10, 64)
 	if err != nil {
@@ -36,7 +50,8 @@ func GetUserInfo(c context.Context, uid string) (*Db.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return first, nil
+	user := ConverseUserToResponse(first)
+	return &user, nil
 }
 
 func UserRegister(c context.Context, name string, password string, email string) error {
@@ -50,8 +65,8 @@ func UserRegister(c context.Context, name string, password string, email string)
 		Id:        *id,
 		Name:      name,
 		Password:  password,
-		Avatar:    "",
-		Signature: "",
+		Avatar:    configs.DefaultUserAvatar,
+		Signature: "There is nothing",
 		Email:     email,
 	}
 	u := query.User
@@ -89,4 +104,59 @@ func CreateSangList(c context.Context, uid int64, title string) error {
 	}
 	return nil
 
+}
+
+func UpdateUserInfo(
+	c context.Context,
+	uid int64,
+	name string,
+	email string,
+	signature string,
+	avatar *multipart.FileHeader,
+) error {
+
+	if avatar != nil {
+		open, err := avatar.Open()
+		if err != nil {
+			return err
+		}
+		ext := filepath.Ext(avatar.Filename)
+		if ext == "" {
+			ext = ".png"
+		}
+		objectName := strconv.FormatInt(uid, 10) + ext
+		err = MinioUtils.PutFile(c, "user-avatar", objectName, open, avatar)
+		if err != nil {
+			return err
+		}
+		AccessUrl := configs.MinIOEndPoint + "/user-avatar/" + objectName
+		_, err = query.User.WithContext(c).Where(query.User.Id.Eq(uid)).Updates(Db.User{
+			Name:      name,
+			Avatar:    AccessUrl,
+			Signature: signature,
+			Email:     email,
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := query.User.WithContext(c).Where(query.User.Id.Eq(uid)).Updates(Db.User{
+			Name:      name,
+			Signature: signature,
+			Email:     email,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func GetUserSangList(c context.Context, uid int64) ([]*response.SangList, error) {
+	find, err := query.SangList.WithContext(c).Where(query.SangList.Creater.Eq(uid)).Find()
+	if err != nil {
+		return nil, err
+	}
+
+	sangListResponse := convertSangListToResponse(find)
+	return sangListResponse, nil
 }

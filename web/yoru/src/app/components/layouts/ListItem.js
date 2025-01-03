@@ -23,10 +23,12 @@ export function ListItem(props) {
     }
     
     const GoAuthorDetail=()=>{
-    
         emitter.emit("GoAuthorDetail",{name:props.author})
     }
     
+    const GoAlbumDetail=()=>{
+        emitter.emit("GoAlbumDetail",{title:props.album})
+    }
     
     return(
         <div className={` flex flex-row w-full h-20 justify-between mt-3 rounded-xl hover:bg-white items-center hover:bg-opacity-5`}
@@ -47,7 +49,7 @@ export function ListItem(props) {
                     <div onClick={GoAuthorDetail} className={`text-gray-300 hover:underline hover:text-white`}>{props.author}</div>   
                 </div>
             </div>
-            <div className={`hover:cursor-pointer hover:underline w-1/3 flex items-center justify-start truncate`}>{props.album}</div>
+            <div onClick={GoAlbumDetail} className={`hover:cursor-pointer hover:underline w-1/3 flex items-center justify-start truncate`}>{props.album}</div>
             <div className={`w-1/6 flex flex-row-reverse items-center justify-between`}>
                 {state.hover?<SvgMore  onclick={()=>{handleState(`more`,true)}} className={`${props.wmore?`mr-3 w-8 h-1/2`:`w-1/4`} hover:scale-110  hover:cursor-pointer`} w={`16`} h={`16`}></SvgMore>:<div className={`w-1/4`} />}
                 {!props.notime&&<div>{props.length}</div>}

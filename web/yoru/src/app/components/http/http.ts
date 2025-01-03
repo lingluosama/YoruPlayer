@@ -1,4 +1,4 @@
-const BaseUrl = "http://localhost:8888";
+const BaseUrl = "/api";
 
 export const $http = async (
   method: string,

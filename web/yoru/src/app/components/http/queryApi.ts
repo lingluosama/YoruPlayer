@@ -63,3 +63,12 @@ export const GetAuthorPage=(data:{
         false
     )
 }
+
+export const GetAlbumInfoByTitle=(data:{title:string})=>{
+    return $http(
+        "GET",
+        "/query/album/bytitle",
+        data,
+        false
+    )
+}

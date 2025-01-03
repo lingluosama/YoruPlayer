@@ -99,11 +99,41 @@ func convertSangListToResponse(sangLists []*Db.SangList) []*response.SangList {
 		responseSangLists = append(responseSangLists, &response.SangList{
 			Id:      strconv.FormatInt(sangList.Id, 10),
 			Cover:   sangList.Cover,
-			Creater: sangList.Creater,
+			Creater: strconv.FormatInt(sangList.Creater, 10),
 			Title:   sangList.Title,
 		})
 	}
 	return responseSangLists
+}
+
+func convertTagsToResponse(tags []*Db.Tag) []*response.Tag {
+	var responseTags []*response.Tag
+	for _, tag := range tags {
+		responseTags = append(responseTags, &response.Tag{
+			Id:   strconv.FormatInt(tag.Id, 10),
+			Name: tag.Name,
+		})
+	}
+	return responseTags
+}
+
+func QueryTagList(c context.Context, begin int, size int, keyword *string) ([]*response.Tag, int32, error) {
+	db := query.Tag.WithContext(c)
+	if keyword != nil && *keyword != "" {
+		db = db.Where(query.Tag.Name.Like("%" + *keyword + "%"))
+	}
+	find, err := db.Limit(size).Offset(begin).Find()
+	if err != nil {
+		return nil, 0, err
+	}
+	count, err := db.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	tagsToResponse := convertTagsToResponse(find)
+	return tagsToResponse, int32(count), nil
+
 }
 
 func QueryAuthor(c context.Context, begin int, size int, keyword *string) ([]*response.Author, int32, error) {
@@ -180,8 +210,13 @@ func GetSangListInfoById(c context.Context, lid int64) (*response.SangListDetail
 	}
 
 	return &response.SangListDetailResponse{
-		Singles:  singles,
-		SangList: *SangList,
+		Singles: ConvertSingleToResponse(singles),
+		SangList: response.SangList{
+			Id:      strconv.FormatInt(SangList.Id, 10),
+			Cover:   SangList.Cover,
+			Creater: strconv.FormatInt(SangList.Creater, 10),
+			Title:   SangList.Title,
+		},
 	}, nil
 }
 
@@ -249,5 +284,4 @@ func GetAuthorPage(c context.Context, name string) (res *response.AuthorPageRes,
 		AlbumList: Albums,
 	}
 	return &pageRes, nil
-
 }

@@ -36,15 +36,28 @@ func AddToHistory(c context.Context, uid int64, sang Db.Single) error {
 		if err != nil {
 			return err
 		}
+		//存在歌曲count++
+		for _, message := range PlayHistory.Messages {
+			if message.Single.Id == sang.Id {
+				message.Count++
+				RedisUtils.SetValue(c, key, PlayHistory)
+			}
+		}
+		NewRecord.Count = 1
 		PlayHistory.Messages = append(PlayHistory.Messages, &NewRecord)
-		RedisUtils.SetValue(c, key, PlayHistory)
+		//限制100条
+		if len(PlayHistory.Messages) > 100 {
+			PlayHistory.Messages = PlayHistory.Messages[1:]
+		}
 	} else {
 		PlayHistory.Uid = uid
+		NewRecord.Count = 1
 		PlayHistory.Messages = make([]*cache.HistoryMessage, 0)
 		PlayHistory.Messages = append(PlayHistory.Messages, &NewRecord)
-
-		RedisUtils.SetValue(c, key, PlayHistory)
 	}
+
+	RedisUtils.SetValue(c, key, PlayHistory)
+
 	return nil
 }
 

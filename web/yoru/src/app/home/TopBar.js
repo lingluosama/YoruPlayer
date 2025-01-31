@@ -32,8 +32,8 @@ export const TopBar = (props) => {
                 handleState("current_user",res.data);
             }
         }
-        FetchUserInfo()
-    }, [props]);
+        FetchUserInfo() 
+    }, []);
 
     return (
         <div className=" relative min-h-16 w-full items-center justify-center space-x-3 flex flex-row">

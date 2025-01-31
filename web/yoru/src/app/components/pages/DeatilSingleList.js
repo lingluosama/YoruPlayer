@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from "react"; 
-import { GetAlbumDetail, GetAuthorPage, GetSangListDetail, GeyAuthorByName } from "../http/queryApi"; 
+import { GetAlbumDetail, GetAuthorPage, GetSangListDetail, GeyAuthorByName,QueryList } from "../http/queryApi"; 
 import { getColorFromImage } from "mdui"; 
 import { ListItem } from "../layouts/ListItem"; 
 import { $httpFormData } from "../http/FormDataApi"; 
 import {SvgCancel} from "../../assets/svg/Cancel"; 
+import Modal from "../layouts/Modal"; 
+import {AddTagForSangList,DropTagForSangList, GetSangListTag,SearchTag} from "../http/recommendApi"; 
+import {debounce} from "next/dist/server/utils"; 
+import {SangTag} from "../layouts/SangTag"; 
 
 export function DetailSingleList(props) {
     const imgRef = useRef(null);
+    const edit_uploadRef = useRef(null);
     const [state, setState] = useState({
         title: "",
         type: "null",
@@ -19,6 +24,17 @@ export function DetailSingleList(props) {
         color: '#fff',
         author_avatar: "",
         author_name: "",
+        creater:"",
+        show_modal:"",
+        edit_title:"",
+        edit_description:"",
+        edit_file:"",
+        edit_fileName:"",
+        tag_search:"",
+        current_tags:[],
+        result_tags:[],
+        sanglist_id:"",
+        show_tagList:false,
     });
     
     const handleState = (name, value) => {
@@ -27,7 +43,14 @@ export function DetailSingleList(props) {
 
     const GetSangListData = async () => {
         const res = await GetSangListDetail({ lid: props.sanglist.id });
+        handleState("title", res.data.sangList.title);
+        handleState("sanglist_id",res.data.sangList.id);
+        handleState("cover", res.data.sangList.cover);
         handleState("sanglist", res.data.singles);
+        handleState("creater",res.data.sangList.creater);
+        handleState("description",res.data.sangList.description);
+        handleState("edit_title",res.data.sangList.title)
+        handleState("edit_description",res.data.sangList.description)
     }
 
     const GetAlbumListData = async () => {
@@ -40,7 +63,21 @@ export function DetailSingleList(props) {
         handleState("author_avatar", res.data.avatar);
         handleState("author_name", res.data.name);
     }
-
+    const HandleSearch=useRef(
+        debounce(async (keyword,size)=>{
+            const res = await SearchTag({
+                offset: 0,
+                size: size,
+                keyword: keyword,
+            });
+            handleState("result_tags",res.data);
+        },1000)
+        ).current
+    const Edit_TagInputChange = async (event) => {
+        HandleSearch(event.target.value,4);
+        handleState(`tag_search`,event.target.value);
+        handleState("show_tagList",true);
+    }
     const GetSingleAlbum = async (sanglist) => {
         const ids = sanglist.map(item => item.album_id);
         const formData = new FormData();
@@ -55,7 +92,38 @@ export function DetailSingleList(props) {
         handleState("albumlist", res.data.album_list);
         handleState(`cover`,res.data.author.avatar)
     }
-
+    
+    const handleEditUploadChange=(e)=>{
+        if(e.target.files.length > 0){
+            handleState("edit_fileName",e.target.files[0].name);
+            handleState("edit_file",e.target.files[0]);
+        }
+    }
+    const SubmitUploadSangList=async ()=>{
+        const formData=new FormData()
+        if(state.edit_file)formData.append("cover",state.edit_file,state.edit_fileName)
+        formData.append("description",state.edit_description)
+        formData.append("title",state.edit_title)
+        formData.append("lid",state.sanglist_id)
+        var res = await $httpFormData(formData,"/user/update/sanglist");
+        if(res.msg==="Ac"){
+            await GetSangListData()
+        }
+    }
+    const AddTag=async (tag)=>{
+        var res = await AddTagForSangList({lid:state.sanglist_id,tag:tag});
+        if(res.msg==="Ac"){
+            res = await GetSangListTag({lid:state.sanglist_id});
+            handleState("current_tags",res.data)
+        }
+    }
+    const  DropTag=async (tag)=>{
+        var res = await DropTagForSangList({lid:state.sanglist_id,tag:tag});
+        if(res.msg==="Ac"){
+            res = await GetSangListTag({lid:state.sanglist_id});
+            handleState("current_tags",res.data)
+        }  
+    }
     useEffect(() => {
         async function fetchData() {
             switch (props.type) {
@@ -122,9 +190,87 @@ export function DetailSingleList(props) {
             })();
         }
     }, [state.cover]);
+    
+    useEffect(() => {
+    	async function GetCurrentTags() {
+            var res = await GetSangListTag({lid:state.sanglist_id});
+            handleState("current_tags",res.data)
+            
+    	}
+        GetCurrentTags();
+    }, [state.show_modal]);
 
       return (
         <div className=" m-8 p-8 space-y-5 rounded-2xl min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(${state.color}, transparent)` }}>
+            <Modal show={state.show_modal} onClick={()=>handleState("show_modal",false)}>
+                <div className={`p-6 flex flex-col w-2/5 h-3/5 bg-deep-gary space-y-6 rounded-2xl`} onClick={e=>e.stopPropagation()}>
+                    <div className={`w-full text-2xl`}>编辑歌单</div>
+                    <div className={`flex flex-row w-full h-1/2 justify-between`}>
+                        <div className={`w-1/3`}>
+                           <label className="w-full h-full border-2 border-dashed border-white bg-deep-gary  rounded-2xl flex flex-col items-center object-cover bg-cover justify-center cursor-pointer shadow-2xl" style={{backgroundImage:`url(http://${state.cover})`, backgroundSize: 'cover'}}>
+                               <span className="text-sky-400 font-semibold">Click To Upload</span>
+                               <span className="text-sm text-white">Limited One File, The New Will Replace Old One</span>
+                               <input 
+                                   ref={edit_uploadRef} 
+                                   type="file" 
+                                   className="hidden"
+                                   onChange={(e)=>handleEditUploadChange(e)} 
+                               />
+                           </label>
+                            {state.edit_fileName&&<div>{state.edit_fileName}</div>}
+                        </div>
+                        <div className={`w-3/5 flex flex-col h-auto space-y-6`}>
+                            <div className={`w-full h-auto items-center flex flex-row space-x-6`}>
+                                <div className={`w-1/5 flex-nowrap`}>标题:</div>
+                                <input 
+                                    type={"text"} 
+                                    className={`h-10 w-4/5 p-3 bg-opacity-10 bg-white rounded-sm`}
+                                    value={state.edit_title}
+                                    onChange={(e) => handleState("edit_title",e.target.value)} 
+                                />
+                            </div>
+                            <div className={`w-full h-auto items-center flex flex-row space-x-6`}>
+                                <div className={`w-1/5`}>描述:</div>
+                                <textarea
+                                    className={`h-20 max-h-32 w-4/5  p-3 bg-opacity-10 bg-white rounded-sm`}
+                                    value={state.edit_description}
+                                    onChange={(e) => handleState("edit_description",e.target.value)} 
+                                />
+                            </div>
+                        </div>
+                    </div>
+               <div className={`w-full flex flex-col space-y-6`}>
+                        <div className={`h-auto ml-3 w-full flex flex-row items-center space-x-4`}>
+                            <div>已添加:</div>
+                            {state.current_tags&&state.current_tags.map((item,index)=>(
+                                <SangListTag key={index} context={item} Onclick={()=>DropTag(item)}></SangListTag>
+                                ))}
+                        </div>
+                        <div className={` flex flex-row items-center justify-between relative`}>
+                            <mdui-text-field 
+                            onClick={()=>{handleState("show_tagList",true)}}
+                            value={state.tag_search} onInput={Edit_TagInputChange} 
+                            className={`ml-3 w-1/2 mdui-theme-dark h-12` } 
+                            variant="outlined" 
+                            label={`输入并按下回车以添加首个匹配标签`}
+                            onKeyDown={async (event)=>{
+                                event.key==="Enter"?await AddTag(state.result_tags[0]):{}
+                                handleState("show_tagList",false)
+                            }}
+                            ></mdui-text-field>
+                            <mdui-button className={`w-24`} onClick={SubmitUploadSangList}>保存</mdui-button>
+                            <div 
+                             onMouseLeave={()=>handleState("show_tagList",false)}
+                             className={`w-1/3 h-32 bg-gray-700 absolute top-full flex ${!state.show_tagList&&`hidden`} flex-col items-center p-2 rounded-2xl`}>
+                                {state.result_tags&&state.result_tags.map((item,index)=>(<div 
+                                className={`w-full h-1/4 hover:bg-white hover:bg-opacity-10 rounded-xl`}
+                                onClick={()=>AddTag(item)}        
+                                >{item}</div>))}
+                            </div>
+                        </div>
+               </div>       
+                </div>
+            </Modal>
             <div className="w-full h-64   flex flex-row space-x-5">
                 <img 
                     ref={imgRef} 
@@ -135,8 +281,12 @@ export function DetailSingleList(props) {
                 />
                 <div className="flex w-4/5 flex-col justify-end space-y-3">
                     <div className="text-2xl">{state.type}</div>
-                    <div className="text-white text-7xl  flex   w-4/5 whitespace-nowrap text-overflow-ellipsis truncate">{state.title}</div>
-                    {state.type === "专辑" && <div className="">{state.description}</div>}
+                    <div 
+                        className={`text-white text-7xl flex w-4/5 whitespace-nowrap text-overflow-ellipsis truncate ${state.creater===localStorage.getItem("uid")&&`cursor-pointer`} `}
+                        onClick={()=>{state.creater===localStorage.getItem("uid")&&handleState("show_modal",true, )}}>
+                    {state.title}
+                    </div>
+                    {state.description&&<div className="">{state.description}</div>}
                     {state.type === "专辑" && (
                         <div className="w-full flex flex-row">
                             <img className="h-8 w-8 rounded-full" src={`http://${state.author_avatar}`} alt="img" />
@@ -180,16 +330,18 @@ export function DetailSingleList(props) {
     );
 }
 
-export function SangTag(props){
+
+
+export function SangListTag(props){
     const [state, setState] = useState({
         ishover:false
     })
     const handleState=(name,value)=>{
         setState(prevState =>({...prevState, [name]: value }))
     }
-    
+
     return(
-        <div className={`w-16 h-8 p-3 bg-gray-700 relative z-10 rounded-3xl flex justify-center flex-row items-center`} 
+        <div className={`hover:cursor-pointer w-16 h-8 p-3 bg-gray-700 relative z-10 rounded-3xl flex justify-center flex-row items-center`} 
              onMouseOver={()=>handleState("ishover",true)}
              onMouseLeave={()=>handleState("ishover",false)}
              >
@@ -197,7 +349,9 @@ export function SangTag(props){
                 <div className={``}>{props.context}</div>
             </div>
             {state.ishover&&
-               <div className={`w-full flex h-full justify-center absolute bg-gray-500  items-center rounded-3xl`}>
+               <div className={`w-full flex h-full justify-center absolute bg-gray-500  items-center rounded-3xl`}
+                    onClick={props.Onclick}
+               >
                    <SvgCancel w={`16`} h={`16`}></SvgCancel>
                </div>         
             }

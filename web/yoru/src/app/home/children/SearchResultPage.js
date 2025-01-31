@@ -167,17 +167,17 @@ export function SearchResultPage(props) {
                     <div className={`w-full flex flex-row justify-between`}>
                     {
                      state.author_list&&state.author_list.slice(state.author_offset, state.author_offset + 5).map((item, index) => (
-                            <RowCircleItem key={index} name={item.name} src={item.avatar} className={`w-60`}></RowCircleItem>
+                            <RowCircleItem rounded={true} key={index} name={item.name} src={item.avatar} className={`w-60 p-5 hover:bg-white hover:bg-opacity-10 rounded-xl relative`}></RowCircleItem>
                         ))
                     }
                     </div>
                 </div>  
                 <div className={`m-5 space-y-5 flex flex-col`}>
                      <div className={`text-4xl`}>歌单</div>
-                    <div className={`w-full flex flex-row justify-between`}>
+                    <div className={`w-full flex flex-row space-x-6 items-start`}>
                     {
                        state.sanglist_list&&state.sanglist_list.slice(state.sanglist_offset, state.sanglist_offset + 5).map((item, index) => (
-                            <RowCardItem   onClick={()=>{GoToListDetail(index)}} key={index} name={item.title} src={item.cover}></RowCardItem>
+                            <RowCardItem   className={``} onClick={()=>{GoToListDetail(index)}} key={index} name={item.title} src={item.cover}></RowCardItem>
                         ))
                     }
                     </div>                            

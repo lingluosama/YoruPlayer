@@ -212,10 +212,11 @@ func GetSangListInfoById(c context.Context, lid int64) (*response.SangListDetail
 	return &response.SangListDetailResponse{
 		Singles: ConvertSingleToResponse(singles),
 		SangList: response.SangList{
-			Id:      strconv.FormatInt(SangList.Id, 10),
-			Cover:   SangList.Cover,
-			Creater: strconv.FormatInt(SangList.Creater, 10),
-			Title:   SangList.Title,
+			Id:          strconv.FormatInt(SangList.Id, 10),
+			Cover:       SangList.Cover,
+			Creater:     strconv.FormatInt(SangList.Creater, 10),
+			Title:       SangList.Title,
+			Description: SangList.Description,
 		},
 	}, nil
 }

@@ -22,6 +22,9 @@ func UserLogin(c context.Context, name string, password string) (*response.UserL
 	if user == nil {
 		return nil, errors.New("can't find user")
 	}
+	if user.Password != password {
+		return nil, errors.New("wrong password")
+	}
 	res := &response.UserLoginRes{
 		Id:    strconv.FormatInt(user.Id, 10),
 		Token: GenerateToken(strconv.FormatInt(user.Id, 10)),
@@ -86,17 +89,44 @@ func UserRegister(c context.Context, name string, password string, email string)
 	return nil
 }
 
-func CreateSangList(c context.Context, uid int64, title string) error {
+func CreateSangList(
+	c context.Context,
+	uid int64,
+	title string,
+	description string,
+	cover *multipart.FileHeader,
+) error {
+
 	id, err := GenSnowFlakeId(5)
 	if err != nil {
 		log.Panicln("SnowFlakeErr:", err)
 	}
+	var AccessUrl string
+	if cover != nil {
+		open, err := cover.Open()
+		if err != nil {
+			return err
+		}
+		ext := filepath.Ext(cover.Filename)
+		if ext == "" {
+			ext = ".png"
+		}
+		objectName := strconv.FormatInt(*id, 10) + ext
+		err = MinioUtils.PutFile(c, "sanglist-cover", objectName, open, cover)
+		if err != nil {
+			return err
+		}
+		AccessUrl = configs.MinIOEndPoint + "/sanglist-cover/" + objectName
+	} else {
+		AccessUrl = "https://th.bing.com/th/id/OIP.OhuY2Kp0lQPML_nCJLyLQAHaE8?rs=1&pid=ImgDetMain"
+	}
 
 	list := &Db.SangList{
-		Id:      *id,
-		Cover:   "null",
-		Creater: uid,
-		Title:   title,
+		Id:          *id,
+		Cover:       AccessUrl,
+		Creater:     uid,
+		Title:       title,
+		Description: description,
 	}
 	err = query.SangList.WithContext(c).Save(list)
 	if err != nil {
@@ -151,6 +181,7 @@ func UpdateUserInfo(
 	}
 	return nil
 }
+
 func GetUserSangList(c context.Context, uid int64) ([]*response.SangList, error) {
 	find, err := query.SangList.WithContext(c).Where(query.SangList.Creater.Eq(uid)).Find()
 	if err != nil {
@@ -159,4 +190,40 @@ func GetUserSangList(c context.Context, uid int64) ([]*response.SangList, error)
 
 	sangListResponse := convertSangListToResponse(find)
 	return sangListResponse, nil
+}
+
+func UpdateSangList(
+	c context.Context,
+	cover *multipart.FileHeader,
+	lid int64,
+	description string,
+	title string) error {
+	if cover != nil {
+		open, err := cover.Open()
+		if err != nil {
+			return err
+		}
+		ext := filepath.Ext(cover.Filename)
+		if ext == "" {
+			ext = ".png"
+		}
+		objectName := strconv.FormatInt(lid, 10) + ext
+		err = MinioUtils.PutFile(c, "sanglist-cover", objectName, open, cover)
+		if err != nil {
+			return err
+		}
+		AccessUrl := configs.MinIOEndPoint + "/sanglist-cover/" + objectName
+		_, err = query.SangList.WithContext(c).Where(query.SangList.Id.Eq(lid)).Updates(Db.SangList{
+			Title:       title,
+			Cover:       AccessUrl,
+			Description: description,
+		})
+		return err
+	} else {
+		_, err := query.SangList.WithContext(c).Where(query.SangList.Id.Eq(lid)).Updates(Db.SangList{
+			Title:       title,
+			Description: description,
+		})
+		return err
+	}
 }

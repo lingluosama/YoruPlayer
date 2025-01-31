@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@mdui/icons": "^1.0.2",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "antd": "^5.23.3",
     "element-plus": "^2.8.8",
     "element-react": "^1.4.34",
     "element-theme-default": "^1.4.13",

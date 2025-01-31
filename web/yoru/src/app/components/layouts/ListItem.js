@@ -31,7 +31,7 @@ export function ListItem(props) {
     }
     
     return(
-        <div className={` flex flex-row w-full h-20 justify-between mt-3 rounded-xl hover:bg-white items-center hover:bg-opacity-5`}
+        <div className={` flex flex-row w-auto h-20 relative justify-between mt-3 rounded-xl hover:bg-white items-center hover:bg-opacity-5`}
              onMouseEnter={()=>{handleState("hover",true)}}
              onMouseLeave={()=>{handleState("hover",false)}}   
              onDoubleClick={ChangePlay}
@@ -43,20 +43,21 @@ export function ListItem(props) {
                 
                 }
                 <img src={`http://${props.src}`} alt="img" className={` ml-3 object-cover rounded-lg min-h-16 min-w-16  max-h-16 max-w-16`} ></img>
-                <div className={`justify-between flex flex-col ml-5 w-full truncate  `}>
+                <div className={`justify-between flex flex-col ml-5  truncate  `}>
                     <div className={`text-xl w-full truncate`}>{props.title}</div>
-                    
                     <div onClick={GoAuthorDetail} className={`text-gray-300 hover:underline hover:text-white`}>{props.author}</div>   
                 </div>
             </div>
-            <div onClick={GoAlbumDetail} className={`hover:cursor-pointer hover:underline w-1/3 flex items-center justify-start truncate`}>{props.album}</div>
-            <div className={`w-1/6 flex flex-row-reverse items-center justify-between`}>
-                {state.hover?<SvgMore  onclick={()=>{handleState(`more`,true)}} className={`${props.wmore?`mr-3 w-8 h-1/2`:`w-1/4`} hover:scale-110  hover:cursor-pointer`} w={`16`} h={`16`}></SvgMore>:<div className={`w-1/4`} />}
-                {!props.notime&&<div>{props.length}</div>}
-                {!props.noadd&&state.hover?<SvgAdd onclick={AddToQueue} className={` w-1/4 hover:scale-110 hover:cursor-pointer`} w={`16`} h={`16`}></SvgAdd>:<div className={`w-1/4`} />}
+            <div className={`  w-1/3 flex overflow-hidden justify-start `}><div className={`truncate hover:cursor-pointer hover:underline`} onClick={GoAlbumDetail} >{props.album}</div></div>
+            <div className={`w-1/6 flex `}>
+                <div className={`w-full flex flex-row-reverse justify-between p-3`}>
+                    {state.hover?<SvgMore  onclick={()=>{handleState(`more`,true)}} className={`${props.wmore?`absolute left-3/4 bottom-1/3`:`w-1/4`} hover:scale-110  right-0 hover:cursor-pointer`} w={`16`} h={`16`}></SvgMore>:<div className={`w-1/4`} />}
+                    {!props.notime&&<div>{props.length}</div>}
+                    {!props.noadd&&state.hover?<SvgAdd onclick={AddToQueue} className={` w-1/4 hover:scale-110 hover:cursor-pointer`} w={`16`} h={`16`}></SvgAdd>:<div className={`w-1/4`} />}
+                </div>
             <div className={`z-10 flex `}>
             <div 
-            className={`${state.more?` block  right-16 top-0 mt-48 w-48  `:`hidden`}`} 
+            className={`${state.more?` block absolute right-16 bottom-0 mt-48 w-48  `:`hidden`}`} 
             style={{background:`#3A3A3A`}}
             onMouseLeave={()=>{handleState("more",false)}}
             >

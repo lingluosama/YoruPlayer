@@ -140,8 +140,8 @@ export function EditAlbumPage(props) {
                 <mdui-divider className={``}></mdui-divider>
                 <div className={`h-full w-auto overflow-auto flex flex-col space-y-5`}>
                 
-                    {state.add_sang_list.map((item,index)=>(
-                       item.album_id==="114514"&&<div className={` items-center h-32 hover:bg-white hover:rounded-2xl hover:bg-opacity-15 flex flex-row justify-between`}>
+                    {state.add_sang_list&&state.add_sang_list.map((item,index)=>(
+                       item.album_id!==state.current_album.id&&<div className={` items-center h-32 hover:bg-white hover:rounded-2xl hover:bg-opacity-15 flex flex-row justify-between`}>
                             <div className={`items-center w-1/3 space-x-5 h-20 flex flex-row`}>
                                 <img src={`http://${item.cover}`} className={`h-16 w-16 ml-4 object-cover rounded-2xl`} />
                                 <div className={`flex flex-col space-y-2`}>
@@ -265,7 +265,7 @@ export function EditAlbumPage(props) {
                     <div className={`justify-self-end text-end w-full italic text-sm`}>*此项更改会即时生效</div>
                     <mdui-list className={`w-full  rounded-xl`}>
                     {
-                        state.sang_list.map((item,index)=>(<mdui-list-item 
+                        state.sang_list&&state.sang_list.map((item,index)=>(<mdui-list-item 
                         rounded={true}
                         key={index}
                         className={` hover:bg-white hover:bg-opacity-15`}

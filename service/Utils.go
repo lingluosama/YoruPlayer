@@ -12,6 +12,7 @@ import (
 var (
 	RedisUtils initial.RedisClient
 	MinioUtils initial.MinioClient
+	HttpUtils  initial.HttpClient
 )
 
 type Claims struct {

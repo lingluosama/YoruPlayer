@@ -30,6 +30,7 @@ func InitController() *server.Hertz {
 	userGroup.POST("/sanglist/add", AddSingleToSangList)
 	userGroup.POST("/update", UpdateUserInfo)
 	userGroup.GET("/sanglist", GetUserSangList)
+	userGroup.POST("/update/sanglist", UpdateSangListInfo)
 
 	fileGroup := h.Group("/file")
 	fileGroup.POST("/single", middleware.JwtAuth(), UploadSingleSang)
@@ -61,9 +62,14 @@ func InitController() *server.Hertz {
 	recGroup.POST("/tag/add", AddTagForSang)
 	recGroup.GET("/tags", GetTags)
 	recGroup.GET("/tag/single", GetSingleTags)
+	recGroup.GET("/tag/sanglist", GetSangListTags)
 	recGroup.POST("/tag/create", CreateNewTag)
 	recGroup.POST("/tag/drop", DropTagFromSang)
 	recGroup.POST("/tag/erase", EraseTag)
+	recGroup.GET("/result", GetRecommend)
+	recGroup.POST("/tag/drop/sanglist", DropTagFromSangList)
+	recGroup.POST("/tag/add/sanglist", AddTagForSangList)
+	recGroup.GET("/tag/search", SearchTag)
 
 	err := h.Run()
 	if err != nil {

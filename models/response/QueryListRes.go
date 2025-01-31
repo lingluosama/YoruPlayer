@@ -14,10 +14,11 @@ type Album struct {
 	Description string `gorm:"column:description" json:"description"`
 }
 type SangList struct {
-	Id      string `gorm:"primaryKey;column:id" json:"id"`
-	Cover   string `grom:"column:id" json:"cover"`
-	Creater string `gorm:"column:creater" json:"creater"`
-	Title   string `gorm:"column:title" json:"title"`
+	Id          string `gorm:"primaryKey;column:id" json:"id"`
+	Cover       string `grom:"column:id" json:"cover"`
+	Creater     string `gorm:"column:creater" json:"creater"`
+	Title       string `gorm:"column:title" json:"title"`
+	Description string `gorm:"column:description" json:"description"`
 }
 type Author struct {
 	Id     string `gorm:"primaryKey;column:id" json:"id"`

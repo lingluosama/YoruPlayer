@@ -4,6 +4,7 @@ import "YoruPlayer/entity/Db"
 
 type HistoryMessage struct {
 	Single Db.Single
+	Count  int64
 	Tags   []*string
 }
 

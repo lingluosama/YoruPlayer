@@ -148,7 +148,15 @@ const PlayerComponent = forwardRef((props, ref) => {
 
   return (
     <div>
-      <audio preload="auto" className="hidden" controls src={ state.CurrentSang&&`http://${state.CurrentSang.resource}`} ref={audioRef} onTimeUpdate={TimeUpdate}>
+      <audio 
+      preload="auto" 
+      className="hidden" 
+      controls 
+      src={ state.CurrentSang&&`http://${state.CurrentSang.resource}`} 
+      ref={audioRef} 
+      onTimeUpdate={TimeUpdate}
+      onEnded={async ()=>{await DeleteFormPlayQueue({sid:state.CurrentSang.id})}}
+      >
       </audio>
     </div>
   );

@@ -16,15 +16,16 @@ import (
 )
 
 var (
-	Q          = new(Query)
-	Album      *album
-	Author     *author
-	SangList   *sangList
-	SangToList *sangToList
-	SangToTag  *sangToTag
-	Single     *single
-	Tag        *tag
-	User       *user
+	Q             = new(Query)
+	Album         *album
+	Author        *author
+	SangList      *sangList
+	SangListToTag *sangListToTag
+	SangToList    *sangToList
+	SangToTag     *sangToTag
+	Single        *single
+	Tag           *tag
+	User          *user
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -32,6 +33,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Album = &Q.Album
 	Author = &Q.Author
 	SangList = &Q.SangList
+	SangListToTag = &Q.SangListToTag
 	SangToList = &Q.SangToList
 	SangToTag = &Q.SangToTag
 	Single = &Q.Single
@@ -41,44 +43,47 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:         db,
-		Album:      newAlbum(db, opts...),
-		Author:     newAuthor(db, opts...),
-		SangList:   newSangList(db, opts...),
-		SangToList: newSangToList(db, opts...),
-		SangToTag:  newSangToTag(db, opts...),
-		Single:     newSingle(db, opts...),
-		Tag:        newTag(db, opts...),
-		User:       newUser(db, opts...),
+		db:            db,
+		Album:         newAlbum(db, opts...),
+		Author:        newAuthor(db, opts...),
+		SangList:      newSangList(db, opts...),
+		SangListToTag: newSangListToTag(db, opts...),
+		SangToList:    newSangToList(db, opts...),
+		SangToTag:     newSangToTag(db, opts...),
+		Single:        newSingle(db, opts...),
+		Tag:           newTag(db, opts...),
+		User:          newUser(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Album      album
-	Author     author
-	SangList   sangList
-	SangToList sangToList
-	SangToTag  sangToTag
-	Single     single
-	Tag        tag
-	User       user
+	Album         album
+	Author        author
+	SangList      sangList
+	SangListToTag sangListToTag
+	SangToList    sangToList
+	SangToTag     sangToTag
+	Single        single
+	Tag           tag
+	User          user
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Album:      q.Album.clone(db),
-		Author:     q.Author.clone(db),
-		SangList:   q.SangList.clone(db),
-		SangToList: q.SangToList.clone(db),
-		SangToTag:  q.SangToTag.clone(db),
-		Single:     q.Single.clone(db),
-		Tag:        q.Tag.clone(db),
-		User:       q.User.clone(db),
+		db:            db,
+		Album:         q.Album.clone(db),
+		Author:        q.Author.clone(db),
+		SangList:      q.SangList.clone(db),
+		SangListToTag: q.SangListToTag.clone(db),
+		SangToList:    q.SangToList.clone(db),
+		SangToTag:     q.SangToTag.clone(db),
+		Single:        q.Single.clone(db),
+		Tag:           q.Tag.clone(db),
+		User:          q.User.clone(db),
 	}
 }
 
@@ -92,39 +97,42 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Album:      q.Album.replaceDB(db),
-		Author:     q.Author.replaceDB(db),
-		SangList:   q.SangList.replaceDB(db),
-		SangToList: q.SangToList.replaceDB(db),
-		SangToTag:  q.SangToTag.replaceDB(db),
-		Single:     q.Single.replaceDB(db),
-		Tag:        q.Tag.replaceDB(db),
-		User:       q.User.replaceDB(db),
+		db:            db,
+		Album:         q.Album.replaceDB(db),
+		Author:        q.Author.replaceDB(db),
+		SangList:      q.SangList.replaceDB(db),
+		SangListToTag: q.SangListToTag.replaceDB(db),
+		SangToList:    q.SangToList.replaceDB(db),
+		SangToTag:     q.SangToTag.replaceDB(db),
+		Single:        q.Single.replaceDB(db),
+		Tag:           q.Tag.replaceDB(db),
+		User:          q.User.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Album      IAlbumDo
-	Author     IAuthorDo
-	SangList   ISangListDo
-	SangToList ISangToListDo
-	SangToTag  ISangToTagDo
-	Single     ISingleDo
-	Tag        ITagDo
-	User       IUserDo
+	Album         IAlbumDo
+	Author        IAuthorDo
+	SangList      ISangListDo
+	SangListToTag ISangListToTagDo
+	SangToList    ISangToListDo
+	SangToTag     ISangToTagDo
+	Single        ISingleDo
+	Tag           ITagDo
+	User          IUserDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Album:      q.Album.WithContext(ctx),
-		Author:     q.Author.WithContext(ctx),
-		SangList:   q.SangList.WithContext(ctx),
-		SangToList: q.SangToList.WithContext(ctx),
-		SangToTag:  q.SangToTag.WithContext(ctx),
-		Single:     q.Single.WithContext(ctx),
-		Tag:        q.Tag.WithContext(ctx),
-		User:       q.User.WithContext(ctx),
+		Album:         q.Album.WithContext(ctx),
+		Author:        q.Author.WithContext(ctx),
+		SangList:      q.SangList.WithContext(ctx),
+		SangListToTag: q.SangListToTag.WithContext(ctx),
+		SangToList:    q.SangToList.WithContext(ctx),
+		SangToTag:     q.SangToTag.WithContext(ctx),
+		Single:        q.Single.WithContext(ctx),
+		Tag:           q.Tag.WithContext(ctx),
+		User:          q.User.WithContext(ctx),
 	}
 }
 

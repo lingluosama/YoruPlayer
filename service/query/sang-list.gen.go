@@ -31,6 +31,7 @@ func newSangList(db *gorm.DB, opts ...gen.DOOption) sangList {
 	_sangList.Cover = field.NewString(tableName, "cover")
 	_sangList.Creater = field.NewInt64(tableName, "creater")
 	_sangList.Title = field.NewString(tableName, "title")
+	_sangList.Description = field.NewString(tableName, "description")
 
 	_sangList.fillFieldMap()
 
@@ -40,11 +41,12 @@ func newSangList(db *gorm.DB, opts ...gen.DOOption) sangList {
 type sangList struct {
 	sangListDo
 
-	ALL     field.Asterisk
-	Id      field.Int64
-	Cover   field.String
-	Creater field.Int64
-	Title   field.String
+	ALL         field.Asterisk
+	Id          field.Int64
+	Cover       field.String
+	Creater     field.Int64
+	Title       field.String
+	Description field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -65,6 +67,7 @@ func (s *sangList) updateTableName(table string) *sangList {
 	s.Cover = field.NewString(table, "cover")
 	s.Creater = field.NewInt64(table, "creater")
 	s.Title = field.NewString(table, "title")
+	s.Description = field.NewString(table, "description")
 
 	s.fillFieldMap()
 
@@ -81,11 +84,12 @@ func (s *sangList) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *sangList) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 4)
+	s.fieldMap = make(map[string]field.Expr, 5)
 	s.fieldMap["id"] = s.Id
 	s.fieldMap["cover"] = s.Cover
 	s.fieldMap["creater"] = s.Creater
 	s.fieldMap["title"] = s.Title
+	s.fieldMap["description"] = s.Description
 }
 
 func (s sangList) clone(db *gorm.DB) sangList {

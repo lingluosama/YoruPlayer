@@ -66,3 +66,66 @@ export const EraseTag=(data:{
         false
     )
 }
+export const GetRecommendSang=(data:{
+    uid:string,
+    target:string
+})=>{
+    return $http(
+        "GET",
+        "/recommend/result",
+        data,
+        false
+    )
+    
+}
+
+export const AddTagForSangList=(data:{
+    lid:string,
+    tag:string,
+})=>{
+    return $http(
+        "POST",
+        "/recommend/tag/add/sanglist",
+        data,
+        false
+    )    
+    
+}
+
+export const DropTagForSangList=(data:{
+    lid:string,
+    tag:string
+})=>{
+    return $http(
+        "POST",
+        "/recommend/tag/drop/sanglist",
+        data,
+        false
+    )
+    
+}
+
+export const GetSangListTag=(data:{
+    lid:string
+})=>{
+    return $http(
+        "GET",
+        "/recommend/tag/sanglist",
+        data,
+        false        
+    )
+}
+export const SearchTag=(data:{
+    keyword:string,
+    size:number,
+    offset:number,
+})=>{
+    return $http(
+        "GET",
+        "/recommend/tag/search",
+        data,
+        false
+        
+    )
+    
+}

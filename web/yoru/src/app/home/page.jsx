@@ -59,18 +59,12 @@ const Page = () => {
   };
   const openPlayList = () => {
       PlayListRef.current.open=true
-    PlayListRef.current.classList.remove('hidden');
-    PlayListRef.current.classList.add('translate-x-0');
-    PlayListRef.current.classList.remove('translate-x-full');
   };
   const closeDrawer = () => {
     drawerRef.current.open = false;
   };
   const closePlayList = () => {
       PlayListRef.current.open=false
-    PlayListRef.current.classList.add('translate-x-full');
-    PlayListRef.current.classList.remove('translate-x-0');
-    PlayListRef.current.classList.add('hidden');
   };
   
   const GoToUserHome=()=>{
@@ -111,9 +105,9 @@ const Page = () => {
       case `list-author`:
           return <DetailSingleList name={state.targetAuthor} type={`author`}></DetailSingleList>;
       case  `user-home`:
-          return <UserHomePage></UserHomePage>
+          return <UserHomePage golist={GetCallbackToListDetailPage}></UserHomePage>
         default:
-        return <MainPage />;
+        return <MainPage golist={GetCallbackToListDetailPage} />;
     }
   };
   const GetPlayQueueFromPlayer = (data) => {
@@ -181,19 +175,22 @@ const Page = () => {
   }, []);
 
   return (
-     <div className={`w-full max-h-screen flex flex-row-reverse`}> 
-       <div
+     <div className={`w-full max-h-screen flex flex-row-reverse overflow-hidden  transition-all`}> 
+        <div
          ref={PlayListRef}
-         className={` bg-black  flex-col items-center justify-center hidden w-64 translate-y-0 transition-transform duration-500`}
-       >
-         <SvgCancel onclick={HandlePlayListOpen} className={` hover:bg-white hover:bg-opacity-10 hover:outline-8 hover:outline-white/10 absolute top-2 right-2 hover:scale-110 hover:cursor-pointer`} w={`16`} h={`16`}></SvgCancel>
-         
-         <div className={`w-full mt-2 justify-center items-center text-center`}>播放队列</div>
-         {state.PlayQueue&&state.PlayQueue.map((item, index) => (
-             <ListItem inqueue={true} sid={item.id} displayIndex={false} key={index} length={item.length} src={item.cover} title={item.title} author={item.author} notime={true} noadd={true} wmore={true}  />
-         ))}
-       </div>
-    <div className="h-screen min-h-screen w-full flex flex-col">
+         className={`${state.PlayListOpen?` w-72 `:` w-0`} transition-all duration-300  overflow-hidden  h-screen  `}>
+           <div
+             className={`${state.PlayListOpen?``:`hidden`} w-72 bg-black  flex-col items-center  justify-center `}
+           >
+             <SvgCancel onclick={HandlePlayListOpen} className={` hover:bg-white hover:bg-opacity-10 hover:outline-8 hover:outline-white/10 absolute top-2 right-2 hover:scale-110 hover:cursor-pointer`} w={`16`} h={`16`}></SvgCancel>
+             
+             <div className={`w-full mt-2 justify-center items-center text-center`}>播放队列</div>
+             {state.PlayQueue&&state.PlayQueue.map((item, index) => (
+                 <ListItem inqueue={true} sid={item.id} displayIndex={false} key={index} length={item.length} src={item.cover} title={item.title} author={item.author} notime={true} noadd={true} wmore={true}  />
+             ))}
+           </div>
+        </div>
+    <div className="h-screen min-h-screen w-full flex flex-col transition-all overflow-hidden ">
       <TopBar 
         gohome={() => { handleState("currentView", "home"); renderComponent(); }}
         onSearch={(keyword) => {
@@ -239,7 +236,7 @@ const Page = () => {
         </div>
       </div>
       
-      <div ref={bottomBarRef} className={`${state.displayBottomBar ? `` : `hidden`} w-full bg-white bg-opacity-5 h-24 translate-y-0 transition-transform duration-500`}>
+      <div ref={bottomBarRef} className={`${state.displayBottomBar ? `h-24` : `h-0`} w-full bg-white bg-opacity-5 transition-all duration-500`}>
         <BottomBar
           url={state.bottomBarImg}
           author={state.bottomBarAuthor}

@@ -71,6 +71,18 @@ func UserRegister(c context.Context, req *app.RequestContext) {
 func CreateSangList(c context.Context, req *app.RequestContext) {
 	Uid := req.FormValue("uid")
 	title := req.FormValue("title")
+	description := req.FormValue("description")
+	formFile, err := req.FormFile("cover")
+	if err != nil && err.Error() == "http: no such file" {
+		formFile = nil
+	}
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Get File Failed:" + err.Error(),
+			Data: nil,
+		})
+		return
+	}
 	uid, err := strconv.Atoi(string(Uid))
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
@@ -79,7 +91,7 @@ func CreateSangList(c context.Context, req *app.RequestContext) {
 		})
 		return
 	}
-	err = service.CreateSangList(c, int64(uid), string(title))
+	err = service.CreateSangList(c, int64(uid), string(title), string(description), formFile)
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
 			Msg:  "service err:" + err.Error(),
@@ -185,4 +197,38 @@ func GetUserSangList(c context.Context, req *app.RequestContext) {
 		Msg:  "Ac",
 		Data: sangList,
 	})
+}
+
+func UpdateSangListInfo(c context.Context, req *app.RequestContext) {
+	Lid := req.FormValue("lid")
+	title := req.FormValue("title")
+	description := req.FormValue("description")
+	lid, err := strconv.ParseInt(string(Lid), 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed trans sid:" + err.Error(),
+		})
+		return
+	}
+	cover, err := req.FormFile("cover")
+	if err != nil && err.Error() == "http: no such file" {
+		cover = nil
+	} else if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Get file panic: " + err.Error(),
+			Data: nil,
+		})
+		return
+	}
+	err = service.UpdateSangList(c, cover, lid, string(description), string(title))
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "service err" + err.Error(),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, models.BaseResponse{
+		Msg: "Ac",
+	})
+
 }

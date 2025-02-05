@@ -88,8 +88,9 @@ func UpdateSingleInfo(c context.Context, req *app.RequestContext) {
 		})
 		return
 	}
-
 	author := req.FormValue("author")
+	
+	
 	err = service.UpdateSingleInfo(c, int64(sid), string(title), string(author), file)
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{

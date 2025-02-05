@@ -1,12 +1,17 @@
 package service
 
 import (
-	"YoruPlayer/configs"
-	"YoruPlayer/initial"
-	"errors"
-	"github.com/bwmarrin/snowflake"
-	"github.com/dgrijalva/jwt-go"
-	"log"
+
+"YoruPlayer/configs"
+"YoruPlayer/initial"
+"errors"
+"github.com/bwmarrin/snowflake"
+"github.com/dgrijalva/jwt-go"
+"github.com/hajimehoshi/go-mp3"
+"log"
+"math"
+"mime/multipart"
+
 )
 
 var (
@@ -60,4 +65,25 @@ func GenSnowFlakeId(node int64) (*int64, error) {
 	}
 	id := newNode.Generate().Int64()
 	return &id, nil
+}
+
+func GetMP3Length(sang *multipart.FileHeader) (time *int64, err error) {
+    temp, err := sang.Open()
+    if err != nil {
+        return nil, err
+    }
+    defer temp.Close()
+
+    decoder, err := mp3.NewDecoder(temp)
+    if err != nil {
+        return nil, err
+    }
+
+    sampleRate := decoder.SampleRate()
+    totalSamples := decoder.Length()
+    durationSeconds := float64(totalSamples) / float64(sampleRate)
+
+    res := int64(math.Ceil(durationSeconds / 4))
+
+    return &res, nil
 }

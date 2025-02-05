@@ -34,13 +34,14 @@ func UploadSingleSang(title string, author string, c context.Context, audio *mul
 	if err != nil {
 		return err
 	}
+	length, _ := GetMP3Length(audio)
 	err = query.Single.Save(&Db.Single{
 		Id:       *id,
 		Resource: resource,
 		Cover:    *coverUrl,
 		Title:    title,
 		Author:   author,
-		Length:   0,
+		Length:   *length,
 		AlbumId:  0,
 	})
 	return err

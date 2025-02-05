@@ -52,7 +52,7 @@ export function ListItem(props) {
             <div className={`w-1/6 flex `}>
                 <div className={`w-full flex flex-row-reverse justify-between p-3`}>
                     {state.hover?<SvgMore  onclick={()=>{handleState(`more`,true)}} className={`${props.wmore?`absolute left-3/4 bottom-1/3`:`w-1/4`} hover:scale-110  right-0 hover:cursor-pointer`} w={`16`} h={`16`}></SvgMore>:<div className={`w-1/4`} />}
-                    {!props.notime&&<div>{props.length}</div>}
+                    {!props.notime&&<div>{`${Math.floor(props.length/60)}:${props.length%60}`}</div>}
                     {!props.noadd&&state.hover?<SvgAdd onclick={AddToQueue} className={` w-1/4 hover:scale-110 hover:cursor-pointer`} w={`16`} h={`16`}></SvgAdd>:<div className={`w-1/4`} />}
                 </div>
             <div className={`z-10 flex `}>

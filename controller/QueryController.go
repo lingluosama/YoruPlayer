@@ -6,7 +6,9 @@ import (
 	"YoruPlayer/service"
 	"YoruPlayer/service/query"
 	"context"
+	"errors"
 	"github.com/cloudwego/hertz/pkg/app"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 	"strings"
@@ -116,11 +118,30 @@ func QueryList(c context.Context, req *app.RequestContext) {
 }
 func GetAlbumInfoByTitle(c context.Context, req *app.RequestContext) {
 	title := req.Query("title")
+	if title == "" {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "title参数不能为空",
+		})
+		return
+	}
 	Album, err := query.Album.WithContext(c).Where(query.Album.Title.Eq(title)).First()
 	if err != nil {
-		req.JSON(http.StatusBadRequest, models.BaseResponse{
-			Msg: "query err:" + err.Error(),
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			req.JSON(http.StatusNotFound, models.BaseResponse{
+				Msg: "专辑不存在",
+			})
+		} else {
+			req.JSON(http.StatusInternalServerError, models.BaseResponse{
+				Msg: "查询失败: " + err.Error(),
+			})
+		}
+		return
+	}
+	if Album == nil {
+		req.JSON(http.StatusInternalServerError, models.BaseResponse{
+			Msg: "数据异常",
 		})
+		return
 	}
 	album := response.Album{
 		Id:          strconv.FormatInt(Album.Id, 10),

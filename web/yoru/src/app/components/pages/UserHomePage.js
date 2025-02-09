@@ -29,19 +29,24 @@ export function UserHomePage(props) {
         current_tags:[],
         result_tags:[],
         show_all_sanglist: false,
+        avatar_key:123,
     });
     const CoverRef = useRef(null);
     const handleState = (name, value) => {
         setState((prevState) => ({ ...prevState, [name]: value }));
     };
+    const FetchUserData=async ()=>{
+        const uid = localStorage.getItem("uid");
+        var res = await GetUserInfo({ uid: uid });
+        handleState("current_user", res.data);
+        handleState("name",res.data.name)
+        res = await GetUserSangList({ uid: uid });
+        handleState("sanglist_list", res.data);
+        reloadAvatar()
+    }
     useEffect(() => {
         const fetchData = async () => {
-            const uid = localStorage.getItem("uid");
-            var res = await GetUserInfo({ uid: uid });
-            handleState("current_user", res.data);
-            handleState("name",res.data.name)
-            res = await GetUserSangList({ uid: uid });
-            handleState("sanglist_list", res.data);
+            await FetchUserData()
         };
         fetchData();
     }, [props]);
@@ -94,7 +99,10 @@ export function UserHomePage(props) {
             }else{
             }
     }
-    
+    const reloadAvatar=()=>{
+        handleState("avatar_key",state.avatar_key+1)
+        return state.avatar_key+1
+    }
     const UpdateInfo= async ()=>{
         const formData = new FormData();
         if(state.avatar_file)formData.append("avatar",state.avatar_file,state.avatar_file_name)
@@ -110,6 +118,7 @@ export function UserHomePage(props) {
             res = await GetUserSangList({ uid: uid });
             handleState("sanglist_list", res.data);
         })
+        await FetchUserData()
     }
     useEffect(() => {
         if(state.message_content){
@@ -130,32 +139,38 @@ export function UserHomePage(props) {
                 onClick={e=>e.stopPropagation()}
                 onChange={handleAvatarChange} 
                  />
-            
+
                 <div onClick={e=>e.stopPropagation()} className={`w-1/3 space-y-6  p-7 h-2/5 rounded-xl bg-deep-gary flex flex-col`}>
                     <div className={`w-full justify-between flex items-center`}>
                         <div className={`text-2xl`}>个人资料详情</div>
                         <SvgCancel onclick={()=>{handleState("displayModal",false)}} w={`24`} h={`24`} className={`hover:scale-110 hover:cursor-pointer`}></SvgCancel>
                     </div>
                     <div className={`w-full flex flex-row items-center space-x-6 ` }>
-                       <img 
-                        src={`http://${state.current_user?state.current_user.avatar:``}`} 
-                        alt={`img`}  
-                        className={`w-48 h-48 rounded-full drop-shadow-2xl object-cover hover:cursor-pointer`}
-                        onClick={()=>fileRef.current.click()} 
-                         />
-                       <div className={`w-full  space-y-6 flex flex-col`}>
-                          <input 
-                            type={"text"} 
-                            className={`h-8 w-full p-3 bg-opacity-10 bg-white rounded-sm`}
-                            value={state.name}
-                            onChange={(e) => handleState("name",e.target.value)} 
+                        <div>
+                            <img
+                                src={`http://${state.current_user ? state.current_user.avatar : ``}`}
+                                alt={`img`}
+                                className={`w-48 h-48 rounded-full drop-shadow-2xl object-cover hover:cursor-pointer`}
+                                onClick={() => fileRef.current.click()}
+                            />
+                            <div>{
+                                state.avatar_file_name && <div
+                                    className={`truncate w-48 text-center hover:bg-white hover:bg-opacity-10 hover:cursor-pointer rounded-sm`}>{state.avatar_file_name}</div>
+                            }</div>
+                        </div>
+
+
+                        <div className={`w-full  space-y-6 flex flex-col`}>
+                            <input
+                                type={"text"}
+                                className={`h-8 w-full p-3 bg-opacity-10 bg-white rounded-sm`}
+                                value={state.name}
+                                onChange={(e) => handleState("name",e.target.value)} 
                              />
                           <mdui-button className={`w-1/2`} onClick={UpdateInfo}>保存</mdui-button>
                        </div>
                     </div> 
-                    {   
-                        state.avatar_file_name&&<div className={`truncate w-48 text-center hover:bg-white hover:bg-opacity-10 hover:cursor-pointer rounded-sm`}>{state.avatar_file_name}</div>
-                    }
+
                 </div>
             </Modal>
             <Modal show={state.create_sanglist} onClick={()=>{handleState("create_sanglist",false)}}>
@@ -206,11 +221,11 @@ export function UserHomePage(props) {
                         alt={`img`}
                         crossOrigin="anonymous"
                         className={`w-64 h-64 rounded-full drop-shadow-2xl object-cover hover:cursor-pointer`}
-                        
+                        key={reloadAvatar}
                         ref={imgRef}
                     />
                     <div className={`flex flex-col-reverse`}>
-                        <div className={`text-sm text-gray-400`}>{state.sanglist_list.length}个公开歌单</div>
+                        <div className={`text-sm text-gray-400`}>{state.sanglist_list&&state.sanglist_list.length||0}个公开歌单</div>
                         <div className={`text-8xl font-bold`}>{state.current_user ? state.current_user.name : ``}</div>
                         <div className={``}>个人资料</div>
                     </div>
@@ -233,7 +248,7 @@ export function UserHomePage(props) {
                     <div className={`text-3xl ml-4`}>公开歌单</div>
                     <div className={`w-full flex flex-row flex-wrap `}>
                     {
-                        state.sanglist_list.slice(0,state.show_all_sanglist?state.show_all_sanglist.length:5).map((item, index) =>{return <RowCardItem onClick={()=>GoToListDetail(index)} key={index} name={item.title} src={item.cover}></RowCardItem>} )
+                        state.sanglist_list&&state.sanglist_list.slice(0,state.show_all_sanglist?state.show_all_sanglist.length:5).map((item, index) =>{return <RowCardItem onClick={()=>GoToListDetail(index)} key={index} name={item.title} src={item.cover}></RowCardItem>} )
                         
                     }
                     <RowCardItem  create={true} key={1} name={`新建歌单`} src={""} onClick={()=>{handleState("create_sanglist",true)}}></RowCardItem>

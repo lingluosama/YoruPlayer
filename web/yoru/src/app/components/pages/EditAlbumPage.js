@@ -78,12 +78,16 @@ export function EditAlbumPage(props) {
     }
     const ToCreate=()=>{
         handleState("isUpdate",false)
-        handleState("current_album",null);
         handleState("title","")
         handleState("description","")
         handleState("author","")        
     }
-    
+    const [reloadKey, setReloadKey] = useState(0);
+    const reloadList =async () => {
+        var res = await GetAlbumDetail({aid:state.current_album.id});
+        handleState("sang_list",res.data.singles)
+        setReloadKey(prev => prev + 1); // 修改 key 值
+    };
     
     const CancelUploadCover = () => {
         if (CoverRef.current) {
@@ -115,6 +119,7 @@ export function EditAlbumPage(props) {
        }else{
            await DeleteSingleFromAlbum({sid:sid})
        }
+       await reloadList()
     }
 
     return (
@@ -263,7 +268,7 @@ export function EditAlbumPage(props) {
                 <div className={`w-full flex flex-col justify-start items-center rounded-xl`}>
                     <div className={`w-full flex `}>歌曲列表:</div>
                     <div className={`justify-self-end text-end w-full italic text-sm`}>*此项更改会即时生效</div>
-                    <mdui-list className={`w-full  rounded-xl`}>
+                    <mdui-list className={`w-full  rounded-xl`} key={reloadKey} >
                     {
                         state.sang_list&&state.sang_list.map((item,index)=>(<mdui-list-item 
                         rounded={true}

@@ -39,3 +39,10 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass "123456"
+    
+  algorithm:
+    build: .
+    ports:
+      - "4399:4399"  
+      
+      

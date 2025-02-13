@@ -5,12 +5,14 @@ import { SvgMore } from "../../assets/svg/More";
 import {RowCardItem} from "../layouts/RowCardItem"; 
 import Modal from "../layouts/Modal"; 
 import {SvgCancel} from "../../assets/svg/Cancel"; 
-import {$httpFormData} from "../http/FormDataApi"; 
+import {$httpFormData} from "../http/FormDataApi";
+import {useNotification} from "../NotificationProvider"; 
 
 export function UserHomePage(props) {
     const imgRef = useRef(null);
     const fileRef =useRef(null)
-    const dropdownRef = useRef(null); 
+    const dropdownRef = useRef(null);
+    const {showNotification} = useNotification();
     const [state, setState] = useState({
         current_user: null,
         color: '#fff',
@@ -49,7 +51,7 @@ export function UserHomePage(props) {
             await FetchUserData()
         };
         fetchData();
-    }, [props]);
+    }, []);
 
     useEffect(() => {
         if (imgRef.current) {
@@ -96,6 +98,7 @@ export function UserHomePage(props) {
         var res = await $httpFormData(formData,"/user/create/sanglist");
             if(res.msg==="Ac"){
                handleState("create_sanglist",false);
+                showNotification("success","创建歌单成功")
             }else{
             }
     }
@@ -110,24 +113,12 @@ export function UserHomePage(props) {
         formData.append("signature",state.current_user.signature)
         formData.append("email",state.current_user.email)
         formData.append("uid",state.current_user.id)
-        await $httpFormData(formData, "/user/update").then(async ()=>{
-            const uid = localStorage.getItem("uid");
-            var res = await GetUserInfo({ uid: uid });
-            handleState("current_user", res.data);
-            handleState("name",res.data.name)
-            res = await GetUserSangList({ uid: uid });
-            handleState("sanglist_list", res.data);
-        })
+        const res = await $httpFormData(formData, "/user/update");
+        if(res.msg==="Ac"){
+            showNotification("success","更新用户信息成功")
+        }
         await FetchUserData()
     }
-    useEffect(() => {
-        if(state.message_content){
-            messageApi.open({
-                content:state.message_content,
-                type:state.message_type
-            })
-        }	
-    }, [state.message_content]);
 
     return (
         <div className={`w-full pl-8 pr-8 pb-8 pt-3 rounded-2xl`}>
@@ -145,7 +136,7 @@ export function UserHomePage(props) {
                         <div className={`text-2xl`}>个人资料详情</div>
                         <SvgCancel onclick={()=>{handleState("displayModal",false)}} w={`24`} h={`24`} className={`hover:scale-110 hover:cursor-pointer`}></SvgCancel>
                     </div>
-                    <div className={`w-full flex flex-row items-center space-x-6 ` }>
+                    <div className={`w-full h-full flex flex-row justify-between space-x-6 ` }>
                         <div>
                             <img
                                 src={`http://${state.current_user ? state.current_user.avatar : ``}`}
@@ -160,7 +151,7 @@ export function UserHomePage(props) {
                         </div>
 
 
-                        <div className={`w-full  space-y-6 flex flex-col`}>
+                        <div className={`w-auto h-full justify-center space-y-6 flex flex-col`}>
                             <input
                                 type={"text"}
                                 className={`h-8 w-full p-3 bg-opacity-10 bg-white rounded-sm`}

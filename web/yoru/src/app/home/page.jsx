@@ -24,7 +24,8 @@ import {ListItem} from "../components/layouts/ListItem";
 import {SvgCancel} from "../assets/svg/Cancel"; 
 import {emitter} from "next/client"; 
 import {GetAlbumInfoByTitle} from "../components/http/queryApi"; 
-import {UserHomePage} from "../components/pages/UserHomePage"; 
+import {UserHomePage} from "../components/pages/UserHomePage";
+import {OnLoad} from "../components/pages/OnLoad"; 
 
 const Page = () => {
   const [state, setState] = useState({
@@ -93,7 +94,7 @@ const Page = () => {
       case 'home':
         return <MainPage golist={GetCallbackToListDetailPage} />;
       case 'play':
-        return <PlayPage />;
+        return <PlayPage/>;
       case 'album':
         return <EditAlbumPage create={true} />;
       case `upload`:
@@ -113,8 +114,7 @@ const Page = () => {
   const GetPlayQueueFromPlayer = (data) => {
       handleState("PlayQueue", data);
   }
-  useEffect(() => {
-  }, [PlayerRef]);
+
   
   
   const UpdateTime = (value) => {
@@ -160,7 +160,7 @@ const Page = () => {
     }
   };
 
-  useEffect(() => {
+  useEffect(()  => {
       emitter.on('GoAuthorDetail',({name})=>{
           handleState("targetAuthor", name);
           handleState("currentView", "list-author");
@@ -253,7 +253,7 @@ const Page = () => {
         <SvgPackOpen className={`absolute bottom-0 hover:cursor-pointer ` } w={`32`} h={`32`} onclick={showBottomBar} />
       </div>
     </div>
-    </div>
+    </div>||<OnLoad></OnLoad>
   );
 };
 

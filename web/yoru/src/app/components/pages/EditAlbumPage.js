@@ -7,7 +7,9 @@ import {GetAlbumDetail, QueryList} from "../http/queryApi";
 import Modal from "../layouts/Modal"; 
 import {CreateAuthor} from "../layouts/CreateAuthor"; 
 import {AddSingleToAlbum,DeleteSingleFromAlbum} from "../http/updateApi"; 
-import {SvgAdd} from "../../assets/svg/Add"; 
+import {SvgAdd} from "../../assets/svg/Add";
+import {useNotification} from "../NotificationProvider";
+import {globalLoadControl} from "../../lib/loadControl"; 
 
 export function EditAlbumPage(props) {
     const CoverRef = useRef(null);
@@ -28,7 +30,7 @@ export function EditAlbumPage(props) {
         displayModal:false,
         displayAddSangModal:false,
     });
-
+    var {showNotification} = useNotification();
     const handleState = (name, value) => {
         setState((prevState) => ({ ...prevState, [name]: value }));
     };
@@ -98,17 +100,26 @@ export function EditAlbumPage(props) {
     };
     
     const handleSubmit=async ()=>{
+        globalLoadControl.show()
         const formData = new FormData();
         formData.append("title", state.title);
         if(state.cover&&state.coverFileName)formData.append("cover", state.cover,state.coverFileName);
         formData.append("description", state.description);
         formData.append("author", state.author);
-       if(!state.isUpdate) await $httpFormData(formData,"/file/album").then(r => console.log(r))
+        var res
+       if(!state.isUpdate){ 
+           res= await $httpFormData(formData,"/file/album")
+       }
        else {
            formData.append("aid",state.current_album.id)
-           await $httpFormData(formData,"/file/update/album")
+           res= await $httpFormData(formData,"/file/update/album")
        }
-        
+       if(res.msg==="Ac"){
+           showNotification("success","专辑信息已更新")
+       }else{
+           showNotification("error",res.msg)
+       }
+       globalLoadControl.hide() 
     }
     const handleAlbumSangInput=async (sid,value)=>{
        if(value===false){

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import {NotificationProvider} from "@/app/components/NotificationProvider";
+import {LoadPageProvider} from "@/app/components/LoadPageProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,7 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+      <NotificationProvider>
+          <LoadPageProvider>
+              {children}
+          </LoadPageProvider>
+      </NotificationProvider>
       </body>
     </html>
   );

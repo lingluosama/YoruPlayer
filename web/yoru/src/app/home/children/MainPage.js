@@ -8,6 +8,7 @@ import {PlayAbleCard} from "../../components/layouts/PlayAbleCard";
 import {emitter} from "next/client"; 
 import {RowCardItem} from "../../components/layouts/RowCardItem"; 
 import {RowCircleItem} from "../../components/layouts/RowCircleItem";
+import {OnLoad} from "../../components/pages/OnLoad";
 
 export function MainPage(props) {
     const Tags = ["单曲", "专辑", "歌单"];
@@ -98,7 +99,7 @@ export function MainPage(props) {
             handleState("rec_sanglist",res.data);
     	}
         GetUserData()
-    }, [props]);
+    }, []);
     
 
     return (
@@ -146,6 +147,6 @@ export function MainPage(props) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>||<OnLoad></OnLoad>
     );
 }

@@ -3,7 +3,8 @@ import {SvgCancel} from "../../assets/svg/Cancel";
 import {debounce} from "next/dist/server/utils"; 
 import {QueryList} from "../http/queryApi"; 
 import {ChooseBar} from "./ChooseBar"; 
-import {$httpFormData} from "../http/FormDataApi"; 
+import {$httpFormData} from "../http/FormDataApi";
+import {useNotification} from "../NotificationProvider"; 
 export function CreateAuthor(props){
     const coverRef=useRef(null);
     const [state,setstate] = useState({
@@ -15,6 +16,7 @@ export function CreateAuthor(props){
         current_author:null,
         name:"",
     });
+    var {showNotification}= useNotification()
     const handleState=(name,value)=>{
         setstate(prevState => ({ ...prevState, [name]: value }));
     }
@@ -35,10 +37,20 @@ export function CreateAuthor(props){
         formData.append("name",state.name)
         if(state.avatar_file&&state.avatarFileName)formData.append("avatar",state.avatar_file,state.avatarFileName)
         if(state.isCreate){
-            await $httpFormData(formData,"/file/author")
+            var res = await $httpFormData(formData,"/file/author");
+            if(res.msg==="Ac"){
+                showNotification("success","创建作者成功")
+            }else{
+                showNotification("error",res.msg)
+            }
         }else {
             formData.append("id",state.current_author.id)
-            await $httpFormData(formData,"/file/update/author")
+            var res = await $httpFormData(formData,"/file/update/author");
+            if(res.msg==="Ac"){
+                showNotification("success","作者信息已更新")
+            }else{
+                showNotification("error",res.msg)
+            }
         }
         
     }
@@ -67,7 +79,7 @@ export function CreateAuthor(props){
     }
     
     return(
-        <div className={`w-1/2 p-8 h-2/3 bg-gray-800 rounded-xl flex flex-col space-y-5`} onClick={e=>e.stopPropagation()}>
+        <div className={`w-1/2 p-8 h-auto bg-gray-800 rounded-xl flex flex-col space-y-5`} onClick={e=>e.stopPropagation()}>
             <div className={`w-full flex flex-row justify-between items-center`}>
                 <div className={`text-xl`}>{state.isCreate?`Create Author`:`Edit Author:${state.current_author.id}`}</div>
                 <div className={`relative w-1/2 flex justify-end`}>

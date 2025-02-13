@@ -9,11 +9,14 @@ import {CreateAuthor} from "../layouts/CreateAuthor";
 import {AddTagToSang, CreateTag,DropTagFromSang,EraseTag, GetAllTags, GetSangTags} from "../http/recommendApi"; 
 import {TagBottom} from "../layouts/TagButtom";
 import * as PropTypes from "prop-types"; 
-import {SangTag} from "../layouts/SangTag"; 
+import {SangTag} from "../layouts/SangTag";
+import {useNotification} from "../NotificationProvider";
+import {globalLoadControl} from "../../lib/loadControl"; 
 
  export function EditSinglePage(props) {
     const SingleRef = useRef(null);
     const CoverRef = useRef(null);
+    var {showNotification}= useNotification()
     const [state, setState] = useState({
         coverFileName: "",
         singleFileName: "",
@@ -117,6 +120,7 @@ import {SangTag} from "../layouts/SangTag";
     };
 
     const handleSubmit = async () => {
+        globalLoadControl.show()
         const formData = new FormData();
         if (state.cover_file) {
             formData.append("cover", state.cover_file, state.coverFileName);
@@ -126,21 +130,28 @@ import {SangTag} from "../layouts/SangTag";
         }
         formData.append("author", state.author);
         formData.append("title", state.title);
-
         if(!state.isEdit){
             await $httpFormData(formData, "/file/single").then(res=>{
                 if(res.msg==="Ac"){
                     handleState("current_single",null);
                     handleState("title","")
                     handleState("author","")
+                    showNotification("success","歌曲上传成功")
+                }else{
+                    showNotification("error",res.msg)
                 }
             })
-
         }
         else{
             formData.append("sid",state.current_single.id)
-          await $httpFormData(formData,"/file/update/single")
+            const res = await $httpFormData(formData,"/file/update/single");
+            if(res.msg==="Ac"){
+                showNotification("success","歌曲信息已更新")
+            }else{
+                showNotification("error",res.msg)
+            }
         } 
+        globalLoadControl.hide()
     };
     const FetchCurrentTag=async ()=>{
         let res = await GetSangTags({sid:state.current_single.id}); 

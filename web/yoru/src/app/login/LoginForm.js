@@ -1,24 +1,29 @@
 import React,  {useState} from "react"; 
 import {UserLogin} from "../components/http/userApi"; 
-import {useRouter} from "next/router"; 
+import {useRouter} from "next/router";
+import {useNotification} from "../components/NotificationProvider";
+import {useLoadPage} from "../components/LoadPageProvider";
 export const LoginForm = (props) => {
   const [state, setState] = useState({
     username: '',
     password: '',
   });
-
+  var {showNotification} = useNotification();
+  var {showLoadPage} = useLoadPage()
   const handleChange = (e) => {
     const { name, value } = e.target;
     setState(prevState => ({ ...prevState, [name]: value }));
   };
-  
   const handleSubmit = (e) => {
     e.preventDefault();
     UserLogin({username: state.username, password: state.password}).then(res => {
         if(res.msg==="Ac"){
+            showNotification("success","登录成功")
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("uid", res.data.uid);
             window.location.href = "/home";
+        }else{
+            showNotification("error",res.msg)
         }
     })
   };
@@ -55,7 +60,7 @@ export const LoginForm = (props) => {
             Login
           </button>
           <div className="w-full flex items-center justify-center mt-3">
-            <a href="#" className="underline text-blue-500">Forgot password?</a>
+            <a href="#" className="underline text-blue-500" onClick={()=>showLoadPage(true)}>Forgot password?</a>
           </div>
           <div className="w-full flex flex-row-reverse  mt-3">
            <a href="#" className="underline text-blue-500" onClick={props.change}>Don't have account?</a>

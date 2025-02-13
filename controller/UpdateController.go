@@ -89,8 +89,7 @@ func UpdateSingleInfo(c context.Context, req *app.RequestContext) {
 		return
 	}
 	author := req.FormValue("author")
-	
-	
+
 	err = service.UpdateSingleInfo(c, int64(sid), string(title), string(author), file)
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
@@ -195,9 +194,7 @@ func DeleteSingleFormAlbum(c context.Context, req *app.RequestContext) {
 func UploadNewAuthorInfo(c context.Context, req *app.RequestContext) {
 
 	file, err := req.FormFile("avatar")
-	if err != nil && err.Error() == "http: no such file" {
-		file = nil
-	} else if err != nil {
+	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
 			Msg:  "Get file panic: " + err.Error(),
 			Data: nil,

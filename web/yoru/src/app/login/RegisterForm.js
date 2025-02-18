@@ -25,7 +25,7 @@ export const RegisterForm=(props)=>{
       };
     
       return (
-             <div className={`w-3/12 inset-0 flex flex-col bg-white p-8 rounded shadow transform transition-transform duration-500 ${props.isLogin? 'rotate-y-180' : ''}`}>
+             <div className={`w-3/12 inset-0 flex flex-col bg-opacity-45 bg-white p-8 rounded shadow transform transition-transform duration-500 ${props.isLogin? 'rotate-y-180' : ''}`}>
               <h2 className="text-2xl font-semibold text-center text-green-500 ">Register</h2>
               <form onSubmit={handleSubmit} className="mt-4">
                 <div className="mb-4">
@@ -36,7 +36,7 @@ export const RegisterForm=(props)=>{
                     name="username"
                     value={state.username}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border rounded-md"
+                    className="mt-1 p-2 w-full border text-black rounded-md"
                     required
                   />
                 </div>
@@ -60,7 +60,7 @@ export const RegisterForm=(props)=>{
                     name="email"
                     value={state.email}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border rounded-md"
+                    className="mt-1 p-2 w-full border text-black rounded-md"
                     required
                   />
                 </div>

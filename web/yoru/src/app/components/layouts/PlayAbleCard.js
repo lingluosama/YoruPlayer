@@ -14,9 +14,9 @@ export function PlayAbleCard(props){
         >
             <div className={`w-full h-full flex flex-col relative space-y-4`}>
                 <div className={`h-2/3  `}>
-                    <img src={`http://${props.cover}`} className={`h-full w-full object-cover`} />
+                    <img src={`http://${props.cover}`} className={`h-full w-full object-cover rounded-xl`} />
                     <div className={`absolute right-0 bottom-6`} onClick={props.clcickButton}>
-                        {<GreenPlay  w={`48`} h={`48`} className={`transition ease-in-out translate-y-28 hover:cursor-pointer delay-100 ${state.is_hover?`translate-y-0`:``}`}></GreenPlay>}
+                        {<GreenPlay  w={`48`} h={`48`} className={`transition-all duration-300 ease-in-out translate-y-28 hover:cursor-pointer delay-100 ${state.is_hover?`translate-y-0 opacity-100`:`opacity-0`}`}></GreenPlay>}
                     </div>
                 </div>
                 <div className={`text-start flex flex-col`}>

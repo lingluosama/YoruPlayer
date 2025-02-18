@@ -7,11 +7,14 @@ import {SvgCancel} from "../../assets/svg/Cancel";
 import Modal from "../layouts/Modal"; 
 import {AddTagForSangList,DropTagForSangList, GetSangListTag,SearchTag} from "../http/recommendApi"; 
 import {debounce} from "next/dist/server/utils"; 
-import {SangTag} from "../layouts/SangTag"; 
+import {SangTag} from "../layouts/SangTag";
+import {useNotification} from "../providers/NotificationProvider"; 
 
 export function DetailSingleList(props) {
     const imgRef = useRef(null);
     const edit_uploadRef = useRef(null);
+    const {showNotification}= useNotification()
+    
     const [state, setState] = useState({
         title: "",
         type: "null",
@@ -108,6 +111,9 @@ export function DetailSingleList(props) {
         var res = await $httpFormData(formData,"/user/update/sanglist");
         if(res.msg==="Ac"){
             await GetSangListData()
+            showNotification("success","歌单信息已变更")
+        }else{
+            showNotification("error",res.msg)
         }
     }
     const AddTag=async (tag)=>{

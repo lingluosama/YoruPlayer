@@ -4,7 +4,7 @@ import {debounce} from "next/dist/server/utils";
 import {QueryList} from "../http/queryApi"; 
 import {ChooseBar} from "./ChooseBar"; 
 import {$httpFormData} from "../http/FormDataApi";
-import {useNotification} from "../NotificationProvider"; 
+import {useNotification} from "../providers/NotificationProvider"; 
 export function CreateAuthor(props){
     const coverRef=useRef(null);
     const [state,setstate] = useState({

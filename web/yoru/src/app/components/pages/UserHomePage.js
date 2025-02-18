@@ -6,7 +6,7 @@ import {RowCardItem} from "../layouts/RowCardItem";
 import Modal from "../layouts/Modal"; 
 import {SvgCancel} from "../../assets/svg/Cancel"; 
 import {$httpFormData} from "../http/FormDataApi";
-import {useNotification} from "../NotificationProvider"; 
+import {useNotification} from "../providers/NotificationProvider"; 
 
 export function UserHomePage(props) {
     const imgRef = useRef(null);
@@ -101,6 +101,7 @@ export function UserHomePage(props) {
                 showNotification("success","创建歌单成功")
             }else{
             }
+        await FetchUserData()
     }
     const reloadAvatar=()=>{
         handleState("avatar_key",state.avatar_key+1)

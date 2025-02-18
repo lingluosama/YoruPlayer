@@ -227,3 +227,35 @@ func UpdateSangList(
 		return err
 	}
 }
+func GetAddSangListSate(c context.Context, uid int64, sid int64) (*response.SangListProviderRes, error) {
+	userSangList, err := query.SangList.WithContext(c).
+		Where(query.SangList.Creater.Eq(uid)).Find()
+	if err != nil {
+		return nil, err
+	}
+	var res response.SangListProviderRes
+	for i := range userSangList {
+		var row response.SangListProviderRow
+		count, err := query.SangToList.WithContext(c).
+			Where(query.SangToList.LID.Eq(userSangList[i].Id)).
+			Where(query.SangToList.SID.Eq(sid)).Count()
+		if err != nil {
+			return nil, err
+		}
+		row.SangList = response.SangList{
+			Id:          strconv.FormatInt(userSangList[i].Id, 10),
+			Cover:       userSangList[i].Cover,
+			Creater:     strconv.FormatInt(userSangList[i].Creater, 10),
+			Title:       userSangList[i].Title,
+			Description: userSangList[i].Description,
+		}
+		if count > 0 {
+			row.IsIn = true
+		} else {
+			row.IsIn = false
+		}
+		res.List = append(res.List, &row)
+	}
+	return &res, nil
+
+}

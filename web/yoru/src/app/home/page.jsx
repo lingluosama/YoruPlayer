@@ -88,7 +88,7 @@ const Page = () => {
     handleState("listType", type);
     renderComponent();
   };
-
+  
   const renderComponent = () => {
     switch (state.currentView) {
       case 'home':

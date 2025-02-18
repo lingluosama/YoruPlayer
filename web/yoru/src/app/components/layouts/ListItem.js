@@ -2,12 +2,14 @@ import {SvgAdd} from "../../assets/svg/Add";
 import {useEffect, useState} from "react"; 
 import {SvgMore} from "../../assets/svg/More"; 
 import {emitter} from "next/client"; 
-import {SvgWillPlay} from "../../assets/svg/WillPlay"; 
+import {SvgWillPlay} from "../../assets/svg/WillPlay";
+import {useAddPlaylist} from "../providers/AddPlaylistProvider"; 
 export function ListItem(props) {
     const [state, setState] = useState({
         hover:false,
         more:false
     })
+    var {hidden,showList,hiddenList} = useAddPlaylist();
     const handleState=(name,value)=>{
         setState(prevState =>({...prevState, [name]: value} ))
     }
@@ -31,7 +33,7 @@ export function ListItem(props) {
     }
     
     return(
-        <div className={` flex flex-row w-auto h-20 relative justify-between mt-3 rounded-xl hover:bg-white items-center hover:bg-opacity-5`}
+        <div className={` flex flex-row w-auto h-20 relative justify-between mt-3 transition-all rounded-xl hover:bg-white items-center hover:bg-opacity-5 duration-300`}
              onMouseEnter={()=>{handleState("hover",true)}}
              onMouseLeave={()=>{handleState("hover",false)}}   
              onDoubleClick={ChangePlay}
@@ -62,7 +64,9 @@ export function ListItem(props) {
             onMouseLeave={()=>{handleState("more",false)}}
             >
                 <div className={` m-1 flex  flex-col`}>
-                    <div className={`space-x-5 flex flex-row w-full h-8 items-center hover:bg-white hover:bg-opacity-5`}>
+                    <div className={`space-x-5 flex flex-row w-full h-8 items-center hover:bg-white  hover:bg-opacity-5`}
+                        onClick={()=>{showList(props.sid)}}
+                    >
                         <SvgAdd w={`16`} h={`16`}></SvgAdd>
                         <div>加入歌单</div>
                     </div>

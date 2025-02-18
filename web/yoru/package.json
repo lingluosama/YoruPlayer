@@ -12,6 +12,7 @@
     "@mdui/icons": "^1.0.2",
     "@reduxjs/toolkit": "^2.5.1",
     "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@types/three": "^0.173.0",
     "antd": "^5.23.3",
     "element-plus": "^2.8.8",
     "element-react": "^1.4.34",
@@ -25,7 +26,9 @@
     "next-redux-wrapper": "^8.1.0",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "three": "^0.173.0",
+    "uvcanvas": "^0.2.2"
   },
   "devDependencies": {
     "typescript": "^5",

@@ -8,7 +8,7 @@ import Modal from "../layouts/Modal";
 import {CreateAuthor} from "../layouts/CreateAuthor"; 
 import {AddSingleToAlbum,DeleteSingleFromAlbum} from "../http/updateApi"; 
 import {SvgAdd} from "../../assets/svg/Add";
-import {useNotification} from "../NotificationProvider";
+import {useNotification} from "../providers/NotificationProvider";
 import {globalLoadControl} from "../../lib/loadControl"; 
 
 export function EditAlbumPage(props) {

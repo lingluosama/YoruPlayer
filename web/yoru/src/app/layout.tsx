@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import {NotificationProvider} from "@/app/components/NotificationProvider";
-import {LoadPageProvider} from "@/app/components/LoadPageProvider";
+import {NotificationProvider} from "@/app/components/providers/NotificationProvider";
+import {LoadPageProvider} from "@/app/components/providers/LoadPageProvider";
+import {AddPlayListProvider} from "@/app/components/providers/AddPlaylistProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body>
       <NotificationProvider>
           <LoadPageProvider>
-              {children}
+              <AddPlayListProvider>
+                  {children}
+              </AddPlayListProvider>
           </LoadPageProvider>
       </NotificationProvider>
       </body>

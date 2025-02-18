@@ -10,7 +10,7 @@ import {AddTagToSang, CreateTag,DropTagFromSang,EraseTag, GetAllTags, GetSangTag
 import {TagBottom} from "../layouts/TagButtom";
 import * as PropTypes from "prop-types"; 
 import {SangTag} from "../layouts/SangTag";
-import {useNotification} from "../NotificationProvider";
+import {useNotification} from "../providers/NotificationProvider";
 import {globalLoadControl} from "../../lib/loadControl"; 
 
  export function EditSinglePage(props) {

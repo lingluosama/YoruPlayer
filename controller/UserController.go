@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"YoruPlayer/initial"
+	"YoruPlayer/entity/Db"
 	"YoruPlayer/models"
-	"YoruPlayer/models/kafkaMessage"
 	"YoruPlayer/service"
+	"YoruPlayer/service/query"
 	"context"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -109,7 +109,7 @@ func CreateSangList(c context.Context, req *app.RequestContext) {
 func AddSingleToSangList(c context.Context, req *app.RequestContext) {
 	Sid := req.Query("sid")
 	Lid := req.Query("lid")
-	sid, err := strconv.Atoi(Sid)
+	sid, err := strconv.ParseInt(Sid, 10, 64)
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
 			Msg:  "Trans sid failed:" + err.Error(),
@@ -117,7 +117,7 @@ func AddSingleToSangList(c context.Context, req *app.RequestContext) {
 		})
 		return
 	}
-	lid, err := strconv.Atoi(Lid)
+	lid, err := strconv.ParseInt(Lid, 10, 64)
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
 			Msg:  "Trans lid failed:" + err.Error(),
@@ -125,15 +125,62 @@ func AddSingleToSangList(c context.Context, req *app.RequestContext) {
 		})
 		return
 	}
-
-	message := kafkaMessage.AddSangListMessage{
-		Sid: int64(sid),
-		Lid: int64(lid),
+	err = query.SangToList.WithContext(c).Save(&Db.SangToList{
+		LID: lid,
+		SID: sid,
+	})
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Db error:" + err.Error(),
+			Data: nil,
+		})
+		return
 	}
-
-	initial.SendMessageQueue("add-sang-list", message, "useless", c)
+	//message := kafkaMessage.AddSangListMessage{
+	//	Sid: int64(sid),
+	//	Lid: int64(lid),
+	//}
+	//
+	//initial.SendMessageQueue("add-sang-list", message, "useless", c)
 	req.JSON(http.StatusOK, models.BaseResponse{
-		Msg: "Has sent",
+		Msg: "Ac",
+	})
+}
+
+func DeleteSingleFormSangList(c context.Context, req *app.RequestContext) {
+	Lid := req.Query("lid")
+	Sid := req.Query("sid")
+
+	lid, err := strconv.ParseInt(Lid, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Trans lid failed:" + err.Error(),
+			Data: nil,
+		})
+		return
+	}
+	sid, err := strconv.ParseInt(Sid, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Trans sid failed:" + err.Error(),
+			Data: nil,
+		})
+		return
+	}
+	_, err = query.SangToList.WithContext(c).
+		Where(query.SangToList.SID.Eq(sid)).
+		Where(query.SangToList.LID.Eq(lid)).
+		Delete()
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "Db error:" + err.Error(),
+			Data: nil,
+		})
+		return
+	}
+	req.JSON(http.StatusOK, models.BaseResponse{
+		Msg:  "Ac",
+		Data: nil,
 	})
 }
 func UpdateUserInfo(c context.Context, req *app.RequestContext) {
@@ -197,6 +244,36 @@ func GetUserSangList(c context.Context, req *app.RequestContext) {
 		Msg:  "Ac",
 		Data: sangList,
 	})
+}
+func AddSangListState(c context.Context, req *app.RequestContext) {
+	Sid := req.Query("sid")
+	sid, err := strconv.ParseInt(Sid, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed trans sid:" + err.Error(),
+		})
+		return
+	}
+	Uid := req.Query("uid")
+	uid, err := strconv.ParseInt(Uid, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed trans uid:" + err.Error(),
+		})
+		return
+	}
+	sangListSate, err := service.GetAddSangListSate(c, uid, sid)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "service error:" + err.Error(),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, models.BaseResponse{
+		Msg:  "Ac",
+		Data: sangListSate,
+	})
+
 }
 
 func UpdateSangListInfo(c context.Context, req *app.RequestContext) {

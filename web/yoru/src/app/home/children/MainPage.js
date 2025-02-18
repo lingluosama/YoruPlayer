@@ -122,16 +122,16 @@ export function MainPage(props) {
                     <div className={`w-full p-3 overflow-hidden flex flex-row  space-x-6`}>
                         {state.rec_list&&state.rec_list.map((item, index) => (
                             <PlayAbleCard clcickButton={()=>ChangePlay(item.id)} key={index} title={item.title} cover={item.cover} author={item.author} 
-                            className={`w-48 h-52 p-4 hover:bg-white hover:bg-opacity-5 rounded-lg`}></PlayAbleCard>
+                            className={`w-48 h-52 p-4 hover:bg-white transition-all duration-300 hover:bg-opacity-10 rounded-lg`}></PlayAbleCard>
                         ))}
                     </div>
                 </div>
                 <div className={`w-full flex-col overflow-hidden`}>
-                    {state.current_user&&<div className={`text-2xl`}>白听不厌</div>}
+                    {state.current_user&&<div className={`text-2xl`}>百听不厌</div>}
                     <div className={`flex flex-row w-full space-x-6 p-3`}>
                     {
                      state.rec_author&&state.rec_author.map((item, index) => (
-                            <RowCircleItem rounded={true} key={index} name={item.name} src={item.avatar} className={` w-48  h-52  p-3 hover:bg-white hover:bg-opacity-10 rounded-xl`}></RowCircleItem>
+                            <RowCircleItem rounded={true} key={index} name={item.name} src={item.avatar} className={` w-48  h-52 transition-all duration-300  p-3 hover:bg-white hover:bg-opacity-10 rounded-xl`}></RowCircleItem>
                         ))
                     }
                     </div>
@@ -141,7 +141,7 @@ export function MainPage(props) {
                     <div className={`flex flex-row w-full space-x-6 p-3`}>
                     {
                         state.rec_sanglist&&state.rec_sanglist.map((item, index) => (
-                            <RowCircleItem golist={()=>GoSangList(index)} rounded={false} className={` w-48  h-52  p-3 hover:bg-white hover:bg-opacity-10 rounded-xl`}  key={index} name={item.title} src={item.cover}></RowCircleItem>
+                            <RowCircleItem golist={()=>GoSangList(index)} rounded={false} className={` w-48  h-52 transition-all duration-300  p-3 hover:bg-white hover:bg-opacity-10 rounded-xl`}  key={index} name={item.title} src={item.cover}></RowCircleItem>
                         ))
                     }
                     </div>

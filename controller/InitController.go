@@ -31,6 +31,8 @@ func InitController() *server.Hertz {
 	userGroup.POST("/update", UpdateUserInfo)
 	userGroup.GET("/sanglist", GetUserSangList)
 	userGroup.POST("/update/sanglist", UpdateSangListInfo)
+	userGroup.POST("/sanglist/delete", DeleteSingleFormSangList)
+	userGroup.GET("/sanglist/in", AddSangListState)
 
 	fileGroup := h.Group("/file")
 	fileGroup.POST("/single", middleware.JwtAuth(), UploadSingleSang)

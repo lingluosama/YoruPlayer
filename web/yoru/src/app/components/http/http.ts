@@ -1,4 +1,4 @@
-import { useLoadPage } from "@/app/components/LoadPageProvider";
+import { useLoadPage } from "@/app/components/providers/LoadPageProvider";
 import { globalLoadControl } from "@/app/lib/loadControl";
 
 const BaseUrl = "/api";

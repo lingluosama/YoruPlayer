@@ -42,3 +42,41 @@ export const GetUserSangList=(data:{
         false
     )
 }
+
+export const AddToSangList=(data:{
+    sid:string,
+    lid:string,
+})=>{
+    return $http(
+        "POST",
+        "/user/sanglist/add",
+        data,
+        false
+    )
+    
+}
+
+export const SangListProviderData=(data:{
+    sid:string,
+    uid:string
+})=>{
+    return $http(
+        "GET",
+        "/user/sanglist/in",
+        data,
+        false
+
+    )
+
+}
+export const DeleteFormSangList=(data:{
+    lid:string,
+    sid:string,
+})=>{
+    return $http(
+        "POST",
+        "/user/sanglist/delete",
+        data,
+        false
+    )
+}

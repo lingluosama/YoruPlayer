@@ -15,9 +15,10 @@ export const DeleteSingleFromAlbum=(data:{
     sid:string
 })=>{
     return $http(
-        "Post",
+        "POST",
         "/file/album/delete",
         data,
         false
     )    
 }
+

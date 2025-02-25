@@ -2,6 +2,7 @@ package controller
 
 import (
 	"YoruPlayer/entity/Db"
+	"YoruPlayer/entity/cache"
 	"YoruPlayer/models"
 	"YoruPlayer/models/response"
 	"YoruPlayer/service"
@@ -113,6 +114,25 @@ func GetUserPlayHistory(c context.Context, req *app.RequestContext) {
 		return
 	}
 	history, err := service.QueryHistory(c, uid)
+	var historyMessage []*cache.ResHistoryMessage
+	if history != nil {
+		for _, message := range history.Messages {
+			historyMessage = append(historyMessage, &cache.ResHistoryMessage{
+				Single: response.Single{
+					Id:       strconv.FormatInt(message.Single.Id, 10),
+					Resource: message.Single.Resource,
+					Cover:    message.Single.Cover,
+					Title:    message.Single.Title,
+					Author:   message.Single.Author,
+					Length:   message.Single.Length,
+					AlbumId:  strconv.FormatInt(message.Single.AlbumId, 10),
+				},
+				Count: message.Count,
+				Tags:  message.Tags,
+			})
+		}
+	}
+
 	if err != nil {
 		req.JSON(http.StatusBadRequest, models.BaseResponse{
 			Msg: "service err:" + err.Error(),
@@ -121,7 +141,41 @@ func GetUserPlayHistory(c context.Context, req *app.RequestContext) {
 	}
 	req.JSON(http.StatusOK, models.BaseResponse{
 		Msg:  "Ac",
-		Data: history,
+		Data: historyMessage,
 	})
+
+}
+
+func ReplacePlayQueue(c context.Context, req *app.RequestContext) {
+	target := req.Query("target")
+	Uid := req.Query("uid")
+	uid, err := strconv.ParseInt(Uid, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed to trans int in uid:" + err.Error(),
+		})
+		return
+	}
+	Id := req.Query("id")
+	id, err := strconv.ParseInt(Id, 10, 64)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg: "failed to trans int in replace target id:" + err.Error(),
+		})
+		return
+	}
+	err = service.ReplaceQueue(c, uid, id, target)
+	if err != nil {
+		req.JSON(http.StatusBadRequest, models.BaseResponse{
+			Msg:  "service error:" + err.Error(),
+			Data: nil,
+		})
+		return
+	} else {
+		req.JSON(http.StatusOK, models.BaseResponse{
+			Msg:  "Ac",
+			Data: nil,
+		})
+	}
 
 }

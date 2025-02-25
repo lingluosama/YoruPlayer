@@ -25,7 +25,8 @@ import {SvgCancel} from "../assets/svg/Cancel";
 import {emitter} from "next/client"; 
 import {GetAlbumInfoByTitle} from "../components/http/queryApi"; 
 import {UserHomePage} from "../components/pages/UserHomePage";
-import {OnLoad} from "../components/pages/OnLoad"; 
+import {OnLoad} from "../components/pages/OnLoad";
+import {SvgPerson} from "../assets/svg/Person"; 
 
 const Page = () => {
   const [state, setState] = useState({
@@ -212,7 +213,7 @@ const Page = () => {
           <mdui-navigation-drawer 
             close-on-overlay-click 
             ref={drawerRef} 
-            className={`mdui-theme-dark bg-black flex flex-col items-center justify-center w-24 transform ${state.drawerOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-500`}>
+            className={`mdui-theme-dark z-40 bg-black flex flex-col items-center justify-center w-24 transform ${state.drawerOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-500`}>
 
             <NavigationItem name="Album" onClick={() => handleState('currentView', 'album')}>
               <SvgAlbum w={24} h={24} />
@@ -220,14 +221,14 @@ const Page = () => {
             <NavigationItem name={`Upload`} onClick={() => { handleState('currentView', 'upload'); }}>
               <SvgUpload w={24} h={24} />
             </NavigationItem>
-            <NavigationItem name={`Author`} onClick={() => { handleState('currentView', 'author'); }}>
-              <SvgUpload w={24} h={24} />
+            <NavigationItem name={`Person`} onClick={() => { GoToUserHome() }}>
+              <SvgPerson w={`24`} h={`24`} />
             </NavigationItem>
           </mdui-navigation-drawer>
           <mdui-button
-            className="absolute top-1/2"
+            className={`absolute top-1/2 z-40 duration-300 transition-all  ${!state.drawerOpen&&`-translate-x-16`} hover:translate-x-0`}
             onClick={HandleDrawer}>
-            {state.drawerOpen ? <SvgDoubleLeft w={32} h={32} /> : <SvgDoubleRight w={32} h={32} />}
+              {state.drawerOpen ? <SvgDoubleLeft w={32} h={32}  /> : <SvgDoubleRight w={32} h={32} />}
           </mdui-button>
           <div className="flex-grow overflow-y-auto">
             {renderComponent()}

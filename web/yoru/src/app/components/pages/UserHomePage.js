@@ -6,7 +6,8 @@ import {RowCardItem} from "../layouts/RowCardItem";
 import Modal from "../layouts/Modal"; 
 import {SvgCancel} from "../../assets/svg/Cancel"; 
 import {$httpFormData} from "../http/FormDataApi";
-import {useNotification} from "../providers/NotificationProvider"; 
+import {useNotification} from "../providers/NotificationProvider";
+import {GetUserPlayHistory} from "../http/PlayApi"; 
 
 export function UserHomePage(props) {
     const imgRef = useRef(null);
@@ -32,6 +33,9 @@ export function UserHomePage(props) {
         result_tags:[],
         show_all_sanglist: false,
         avatar_key:123,
+        history:[],
+        show_all_history:false,
+        history_index:-1,
     });
     const CoverRef = useRef(null);
     const handleState = (name, value) => {
@@ -46,9 +50,15 @@ export function UserHomePage(props) {
         handleState("sanglist_list", res.data);
         reloadAvatar()
     }
+    const GetUserHistory=async ()=>{
+        const res = await GetUserPlayHistory({uid:localStorage.getItem("uid")});
+        handleState("history",res.data)
+        
+    }
     useEffect(() => {
         const fetchData = async () => {
             await FetchUserData()
+            await GetUserHistory()
         };
         fetchData();
     }, []);
@@ -72,6 +82,7 @@ export function UserHomePage(props) {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
+        
     }, []);
     const handleAvatarChange = (e) => {
         if (e.target.files.length > 0) {
@@ -204,12 +215,12 @@ export function UserHomePage(props) {
                     </div>    
                 </div>
             </Modal>
-            <div 
+            <div
                 className={`p-8 pt-12 w-full min-h-screen rounded-2xl space-y-6 flex flex-col`}
-                style={{ backgroundImage: `linear-gradient(${state.color}, transparent)` }}>
-                <div className={`w-full flex flex-row space-x-12`}>
+                style={{backgroundImage: `linear-gradient(${state.color}, transparent)`}}>
+                <div className={`w-full flex flex-row space-x-12 transition-all duration-300`}>
                     <img
-                        src={`http://${state.current_user? state.current_user.avatar : ``}`}
+                        src={`http://${state.current_user ? state.current_user.avatar : ``}`}
                         alt={`img`}
                         crossOrigin="anonymous"
                         className={`w-64 h-64 rounded-full drop-shadow-2xl object-cover hover:cursor-pointer`}
@@ -217,33 +228,83 @@ export function UserHomePage(props) {
                         ref={imgRef}
                     />
                     <div className={`flex flex-col-reverse`}>
-                        <div className={`text-sm text-gray-400`}>{state.sanglist_list&&state.sanglist_list.length||0}个公开歌单</div>
+                        <div
+                            className={`text-sm text-gray-400`}>{state.sanglist_list && state.sanglist_list.length || 0}个公开歌单
+                        </div>
                         <div className={`text-8xl font-bold`}>{state.current_user ? state.current_user.name : ``}</div>
                         <div className={``}>个人资料</div>
                     </div>
                 </div>
                 <mdui-divider></mdui-divider>
                 <div className={`w-full relative`}>
-                    <SvgMore 
-                        className={`hover:cursor-pointer`} 
-                        w={`48`} 
-                        h={`48`} 
-                        onclick={() => handleState("displayMore", true)} 
+                    <SvgMore
+                        className={`hover:cursor-pointer`}
+                        w={`48`}
+                        h={`48`}
+                        onclick={() => handleState("displayMore", true)}
                     />
-                    <div ref={dropdownRef} className={`absolute z-10 bg-gray-700 p-3 rounded-xl space-y-3 flex flex-col ${state.displayMore ? `` : `hidden`}`}>
-                        <div className={`hover:cursor-pointer hover:bg-white hover:bg-opacity-10`} onClick={()=>{handleState("displayModal",true)}}>编辑个人资料</div>
+                    <div ref={dropdownRef}
+                         className={`absolute z-10 bg-gray-700 p-3 rounded-xl space-y-3 flex flex-col ${state.displayMore ? `` : `hidden`}`}>
+                        <div className={`hover:cursor-pointer hover:bg-white hover:bg-opacity-10`} onClick={() => {
+                            handleState("displayModal", true)
+                        }}>编辑个人资料
+                        </div>
                         <div className={`hover:cursor-pointer hover:bg-white hover:bg-opacity-10`}>退出登陆</div>
                     </div>
                 </div>
-                <div className={`flex w-full space-y-3  flex-col relative`}>
-                    <div className={`absolute right-0 top-3 hover:underline hover:cursor-pointer`} onClick={()=>handleState("show_all_sanglist",!state.show_all_sanglist)}>{state.show_all_sanglist?"收起":"显示全部"}</div>
+                <div className={`flex w-full space-y-5  flex-col relative transition-all duration-300`}>
+                    <div className={`absolute right-0 top-3 hover:underline hover:cursor-pointer`}
+                         onClick={() => handleState("show_all_sanglist", !state.show_all_sanglist)}>{state.show_all_sanglist ? "收起" : "显示全部"}</div>
                     <div className={`text-3xl ml-4`}>公开歌单</div>
                     <div className={`w-full flex flex-row flex-wrap `}>
-                    {
-                        state.sanglist_list&&state.sanglist_list.slice(0,state.show_all_sanglist?state.show_all_sanglist.length:5).map((item, index) =>{return <RowCardItem onClick={()=>GoToListDetail(index)} key={index} name={item.title} src={item.cover}></RowCardItem>} )
-                        
-                    }
-                    <RowCardItem  create={true} key={1} name={`新建歌单`} src={""} onClick={()=>{handleState("create_sanglist",true)}}></RowCardItem>
+                        {
+                            state.sanglist_list && state.sanglist_list.slice(0, state.show_all_sanglist ? state.show_all_sanglist.length : 5).map((item, index) => {
+                                return <RowCardItem onClick={() => GoToListDetail(index)} key={index} name={item.title}
+                                                    src={item.cover}></RowCardItem>
+                            })
+
+                        }
+                        <RowCardItem create={true} key={1} name={`新建歌单`} src={""} onClick={() => {
+                            handleState("create_sanglist", true)
+                        }}></RowCardItem>
+                    </div>
+                    <div className={`w-full flex flex-row justify-between`}>
+                        <div className={`text-3xl ml-4`}>历史记录</div>
+                        {state.show_all_history?
+                            <div className={`cursor-pointer hover:underline`} onClick={()=>handleState("show_all_history",false)}>收起</div>
+                            :<div onClick={()=>handleState("show_all_history",true)} className={`cursor-pointer hover:underline`} >显示全部</div>}
+                    </div>
+                    <div className={`w-full space-y-3 flex flex-col  transition-all duration-300`}>
+                        <div className={`w-full flex flex-row`}>
+                            <div className={`w-1/3 text-end`}>标题</div>
+                            <div className={`w-1/3 text-end`}>作者</div>
+                            <div className={`w-1/3 text-end`}>播放次数</div>
+                        </div>
+                        {state.history && state.history.slice(0,state.show_all_history?state.history.length:4).map((item, index) => {
+                            return <div className={`w-full flex flex-col relative transition-all duration-300`}>
+                                <div
+                                    onMouseOver={() => {
+                                        handleState("history_index", index)
+                                    }}
+                                    onMouseLeave={() => {
+                                        handleState("history_index", -1)
+                                    }}
+                                    className={`relative w-full duration-300  transition-all hover:bg-white h-20 items-center flex flex-row hover:bg-opacity-10 rounded-2xl`}>
+                                    <img alt={`img`} src={` http://${item.Single.cover}`}
+                                         className={`absolute w-16 ml-4  aspect-1 rounded-2xl object-cover`}/>
+                                    <div className={`w-1/3 text-end`}>{item.Single.title}</div>
+                                    <div className={`w-1/3 text-end`}>{item.Single.author}</div>
+                                    <div className={`w-1/3 text-end mr-3`}>{item.Count}</div>
+                                </div>
+                                {<div key={index} className={`w-full flex flex-row transition-all space-x-6 items-center duration-300 ${state.history_index===index?`h-10 `:`h-0 bottom-0 opacity-0`} `}>{
+                                    item.Tags&&item.Tags.map((Tag,index)=>{
+                                    return  <div className={`w-12 h-6 rounded-2xl  bg-gray-700 items-center text-center`}>
+                                        {Tag}
+                                    </div>
+                                    })
+                                }</div>}
+                            </div>
+                        })}
                     </div>
                 </div>
             </div>

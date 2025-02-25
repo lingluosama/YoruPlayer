@@ -113,6 +113,7 @@ const PlayerComponent = forwardRef((props, ref) => {
     emitter.on('AddPlayQueue', AddToPlayQueue);
     emitter.on('DeletePlayQueue',DeleteFormPlayQueue);
     emitter.on(`ChangeVolume`,HandleVolumeChange);
+    emitter.on(`FetchPlayQueue`,FetchPlayQueue);
     if(audioRef.current){audioRef.current.volume=localStorage.getItem("volume")/100;}
     return () => {
       emitter.off('PlayDuration', HandleProgress);

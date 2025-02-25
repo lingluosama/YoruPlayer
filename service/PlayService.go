@@ -36,15 +36,18 @@ func AddToHistory(c context.Context, uid int64, sang Db.Single) error {
 		if err != nil {
 			return err
 		}
-		//存在歌曲count++
+		var exist = false
 		for _, message := range PlayHistory.Messages {
 			if message.Single.Id == sang.Id {
 				message.Count++
 				RedisUtils.SetValue(c, key, PlayHistory)
+				exist = true
 			}
 		}
 		NewRecord.Count = 1
-		PlayHistory.Messages = append(PlayHistory.Messages, &NewRecord)
+		if !exist {
+			PlayHistory.Messages = append(PlayHistory.Messages, &NewRecord)
+		}
 		//限制100条
 		if len(PlayHistory.Messages) > 100 {
 			PlayHistory.Messages = PlayHistory.Messages[1:]
@@ -172,4 +175,37 @@ func DeleteFromQueue(c context.Context, uid int64, sid int64) error {
 		return errors.New("请先开始播放")
 	}
 	return err
+}
+func ReplaceQueue(c context.Context, uid int64, id int64, target string) error {
+	key := GetPlayQueueKey(uid)
+	list := cache.PlayList{
+		Uid:      uid,
+		SangList: []Db.Single{},
+	}
+	if target == "album" {
+		singles, err := query.Single.WithContext(c).Where(query.Single.AlbumId.Eq(id)).Find()
+		if err != nil {
+			return err
+		}
+		for _, single := range singles {
+			list.SangList = append(list.SangList, *single)
+		}
+	} else if target == "sanglist" {
+		singles, err := query.Single.WithContext(c).
+			Join(
+				query.SangToList,
+				query.SangToList.SID.EqCol(query.Single.Id),
+				query.SangToList.LID.Eq(id),
+			).
+			Find()
+		if err != nil {
+			return err
+		}
+		for _, single := range singles {
+			list.SangList = append(list.SangList, *single)
+		}
+	}
+	RedisUtils.SetValue(c, key, list)
+	return nil
+
 }

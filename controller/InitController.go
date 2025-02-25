@@ -59,6 +59,7 @@ func InitController() *server.Hertz {
 	playGroup.POST("/add", middleware.JwtAuth(), AddPlayListQueue)
 	playGroup.POST("/delete", middleware.JwtAuth(), DeleteFormQueue)
 	playGroup.GET("/history", GetUserPlayHistory)
+	playGroup.GET("/replace", ReplacePlayQueue)
 
 	recGroup := h.Group("/recommend")
 	recGroup.POST("/tag/add", AddTagForSang)

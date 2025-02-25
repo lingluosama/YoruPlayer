@@ -74,15 +74,15 @@ export const BottomBar =(props)=>{
     
     
     return (
-        <div className={`w-full flex flex-row items-center h-24 justify-between`}>
-            <div className={` w-1/4 flex flex-row items-center space-x-3 `}>
+        <div className={`w-full flex flex-row items-center h-24 justify-between z-40`}>
+            <div className={` w-1/4 flex flex-row items-center space-x-3 z-40`}>
                   <img src={`http://${state.img}`} alt={`img`} className={`w-20 ml-3 h-20 object-cover rounded-2xl`} />
                   <div className={`flex flex-col space-y-2`}>
                       <div className={`text-xl`}>{state.title}</div>
                       <div className={` italic text-sm`}>{state.author}</div>
                   </div>      
             </div>
-            <div className={`w-1/2 justify-center flex flex-col items-center `}>
+            <div className={`w-1/2 justify-center flex flex-col items-center z-40` }>
                 <div className={`flex flex-row h-12  items-center justify-between w-1/3`}>
                 <SvgPlayQueue className={`hover:scale-110 cursor-pointer`} h={`24`} w={`24`}></SvgPlayQueue>
                 <SvgPreSang onclick={PreSang} className={`hover:scale-110 cursor-pointer`} h={32} w={32}></SvgPreSang>
@@ -105,7 +105,7 @@ export const BottomBar =(props)=>{
                     <div>{TranslateTime(props.total)}</div>
                 </div>
             </div>
-            <div className={`w-1/4 flex flex-row items-center justify-between `}>
+            <div className={`w-1/4 flex flex-row items-center justify-between z-40`}>
                 <div className={`flex  w-1/3`}>
                     <SvgVoice className={`hover:scale-110 cursor-pointer`} w={40} h={40}></SvgVoice>
                     <mdui-slider 

@@ -30,13 +30,15 @@ export const TopBar = (props) => {
             if(uid) {
                 var res = await GetUserInfo({uid:uid});
                 handleState("current_user",res.data);
+                localStorage.setItem("u_avatar",res.data.avatar)
+                localStorage.setItem("u_name",res.data.name)
             }
         }
         FetchUserInfo() 
     }, []);
     const [inputFocus,SetInputFocus]=useState(false)
     return (
-        <div className=" relative min-h-16 w-full items-center justify-center space-x-3 flex flex-row">
+        <div className=" relative min-h-16 w-full items-center justify-center space-x-3 flex flex-row z-40">
             <div className="cursor-pointer w-10 h-10 flex items-center justify-center bg-gray-700 bg-opacity-75 rounded-full">
                 <SvgHome onclick={props.gohome} w="28" h="28" />
             </div>

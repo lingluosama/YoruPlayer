@@ -1,6 +1,9 @@
 package cache
 
-import "YoruPlayer/entity/Db"
+import (
+	"YoruPlayer/entity/Db"
+	"YoruPlayer/models/response"
+)
 
 type HistoryMessage struct {
 	Single Db.Single
@@ -11,4 +14,9 @@ type HistoryMessage struct {
 type PlayHistory struct {
 	Uid      int64 `json:"uid"`
 	Messages []*HistoryMessage
+}
+type ResHistoryMessage struct {
+	Single response.Single
+	Count  int64
+	Tags   []*string
 }

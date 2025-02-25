@@ -17,7 +17,7 @@ export const LoadPageProvider=({children})=>{
     const handleHidden=useRef(
         debounce(()=>{
             setHidden(true)
-        },300)
+        },500)
     ).current
     
     const [dots, setDots] = useState(1)

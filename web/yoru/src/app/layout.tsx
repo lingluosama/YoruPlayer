@@ -4,6 +4,8 @@ import "./globals.css";
 import {NotificationProvider} from "@/app/components/providers/NotificationProvider";
 import {LoadPageProvider} from "@/app/components/providers/LoadPageProvider";
 import {AddPlayListProvider} from "@/app/components/providers/AddPlaylistProvider";
+import 'mdui/mdui.css';
+import 'mdui';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

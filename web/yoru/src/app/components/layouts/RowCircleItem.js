@@ -17,7 +17,7 @@ export function RowCircleItem(props){
             onMouseOver={()=>handleState("is_hover",true)}
             onMouseLeave={()=>handleState("is_hover",false)}>
             <div className={`w-full h-full flex flex-col space-y-2 items-center transition-all relative overflow-hidden`}>
-                <img alt={`img`} src={`http://${props.src}`} className={` h-2/3 aspect-1  object-cover  ${props.rounded?`rounded-full`:``} `}/>
+                <img alt={`img`} src={`http://${props.src}`} className={` h-2/3 aspect-1  object-cover  ${props.rounded?`rounded-full`:`rounded-2xl`} `}/>
                <div className={`w-full flex flex-col`}>
                     <div className={`text-2xl`}>{props.name}</div>
                     {props.rounded?<div>艺人</div>:<div>歌单</div>} 

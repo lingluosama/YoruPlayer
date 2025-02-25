@@ -35,3 +35,25 @@ export const DeleteToQueue=(data:{
         false
     )
 }
+export const ReplaceQueue=(data:{
+    target:string,
+    id:string,
+    uid:string
+})=>{
+    return $http(
+        "GET",
+        "/play/replace",
+        data,
+        false
+    )
+}
+export const GetUserPlayHistory=(data:{
+    uid:string
+})=>{
+    return $http(
+        "GET",
+        "/play/history",
+        data,
+        false
+    )
+}

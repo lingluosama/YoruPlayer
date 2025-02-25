@@ -3,12 +3,10 @@
 import React, {createContext, useContext, useEffect, useState} from "react";
 import Modal from "../layouts/Modal";
 import {AddToSangList, DeleteFormSangList, GetUserSangList, SangListProviderData} from "@/app/components/http/userApi";
-import 'mdui/mdui.css';
-import '@mdui/icons/search.js';
-import 'mdui';
 import {useNotification} from "@/app/components/providers/NotificationProvider";
-const AddPlaylistContext=createContext(null)
+import 'mdui/components/checkbox.js';
 
+const AddPlaylistContext=createContext(null)
 export const AddPlayListProvider=({children})=>{
     const [hidden,setHidden] = useState(true);
     const [list,setList]=useState([])
@@ -25,7 +23,8 @@ export const AddPlayListProvider=({children})=>{
     }
     useEffect(() => {
         const FetchSangList=async ()=>{
-           await GetUserSangList()
+            const res = await SangListProviderData({sid:sid,uid:localStorage.getItem("uid")});
+            setList(res.data.list)
         }
     }, []);
     const CheckBoxChange=async (value,index)=>{
@@ -64,7 +63,7 @@ export const AddPlayListProvider=({children})=>{
                         </div>
                     </div>
                     <mdui-divider></mdui-divider>
-                    <div className={`h-full overflow-auto w-full flex flex-col`} key={0}>{
+                    <div className={`h-full overflow-auto w-full flex flex-col ${hidden?`hidden`:``}`} key={0}>{
                         list.length>0&&list.map((item,index)=> {
                          return <div key={index+1} className={`h-1/5 rounded-2xl mt-3 items-center w-full duration-300 transition-all hover:bg-white  hover:bg-opacity-10 flex flex-row`}>
                              <div className={`h-full w-1/3 justify-items-start items-center flex flex-row`}>
@@ -73,9 +72,14 @@ export const AddPlayListProvider=({children})=>{
                              </div>
                              <div className={`w-2/3 h-full  items-center flex-row flex justify-between `}>
                                  <div className={``}>{item.sangList.title}</div>
-                                 <mdui-checkbox 
+                                 <mdui-checkbox
                                      checked={item.isIn}
-                                     onInput={async (e)=>{await CheckBoxChange(e.target.checked,index)}}   
+                                     onInput={
+                                         async (e) => {
+                                             await CheckBoxChange(e.target.checked, index);
+                                             item.isIn=!item.isIn
+                                         }
+                                     }
                                  ></mdui-checkbox>
                              </div>
                          </div>

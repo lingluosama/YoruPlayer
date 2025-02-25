@@ -71,6 +71,9 @@ export function MainPage(props) {
     const GoSangList=(index)=>{
         props.golist(state.rec_sanglist[index],"sanglist")
     }
+    const GoRecommend=()=>{
+        props.golist(null,"recommend")
+    }
     const handleTagClick = async (item) => {
         handleState("display", item);
         const result = await ChangeDisplay(item).then(res => res.data);
@@ -139,6 +142,7 @@ export function MainPage(props) {
                 <div className={`w-full flex-col overflow-hidden`}>
                     {state.current_user&&<div className={`text-2xl`}>发现更多</div>}
                     <div className={`flex flex-row w-full space-x-6 p-3`}>
+                        <RowCircleItem golist={()=>GoRecommend()} rounded={false}  className={` w-48  h-52 transition-all duration-300  p-3 hover:bg-white hover:bg-opacity-10 rounded-xl`} key={114} name={"每日推荐"} src={localStorage.getItem("u_avatar")} ></RowCircleItem>
                     {
                         state.rec_sanglist&&state.rec_sanglist.map((item, index) => (
                             <RowCircleItem golist={()=>GoSangList(index)} rounded={false} className={` w-48  h-52 transition-all duration-300  p-3 hover:bg-white hover:bg-opacity-10 rounded-xl`}  key={index} name={item.title} src={item.cover}></RowCircleItem>

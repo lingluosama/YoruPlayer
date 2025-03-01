@@ -7,4 +7,6 @@ type User struct {
 	Avatar    string `gorm:"column:avatar" json:"avatar"`
 	Signature string `gorm:"column:signature" json:"signature"`
 	Email     string `gorm:"column:email" json:"email"`
+	Authority bool   `gorm:"colum:authority" json:"authority"`
+	Salt      string `gorm:"colum:salt" json:"salt"`
 }

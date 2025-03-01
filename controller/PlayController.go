@@ -28,10 +28,20 @@ func QueryQueue(c context.Context, req *app.RequestContext) {
 		})
 	}
 	var res []*Db.Single
-	for i := range queue.SangList {
-		res = append(res, &queue.SangList[i])
+	if queue != nil {
+		for i := range queue.SangList {
+			res = append(res, &queue.SangList[i])
+		}
 	}
+
 	singles := service.ConvertSingleToResponse(res)
+	if queue == nil || singles == nil {
+		req.JSON(http.StatusOK, response.QueryListRes{
+			Msg:  "Ac",
+			Data: nil,
+		})
+		return
+	}
 	playQueue := response.PlayQueue{
 		Uid:      strconv.FormatInt(queue.Uid, 10),
 		SangList: singles,

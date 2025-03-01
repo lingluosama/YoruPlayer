@@ -1,5 +1,6 @@
 import React,  {useState} from "react"; 
 import {UserLogin,UserRegister} from "../components/http/userApi";
+import {useNotification} from "../components/providers/NotificationProvider";
 
 export const RegisterForm=(props)=>{
       const [state, setState] = useState({
@@ -7,21 +8,24 @@ export const RegisterForm=(props)=>{
         password: '',
         email:''
       });
-    
+    var {showNotification} = useNotification();
       const handleChange = (e) => {
         const { name, value } = e.target;
         setState(prevState => ({ ...prevState, [name]: value }));
       };
     
-      const handleSubmit = (e) => {
+      const handleSubmit = async (e) => {
         e.preventDefault();
-        UserRegister({
+        var res = await UserRegister({
             username: state.username,
             password: state.password,
             email:state.email,
-            }).then(res => {
-            console.log(res);
-        })
+            });
+          if(res.msg==="Ac"){
+              showNotification("success","注册成功，请前往登录")
+          }else{
+              showNotification("error",res.msg)
+          }
       };
     
       return (

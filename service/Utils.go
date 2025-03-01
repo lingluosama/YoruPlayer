@@ -1,17 +1,19 @@
 package service
 
 import (
-
-"YoruPlayer/configs"
-"YoruPlayer/initial"
-"errors"
-"github.com/bwmarrin/snowflake"
-"github.com/dgrijalva/jwt-go"
-"github.com/hajimehoshi/go-mp3"
-"log"
-"math"
-"mime/multipart"
-
+	"YoruPlayer/configs"
+	"YoruPlayer/initial"
+	"crypto/rand"
+	"crypto/sha512"
+	"crypto/subtle"
+	"errors"
+	"github.com/bwmarrin/snowflake"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/hajimehoshi/go-mp3"
+	"golang.org/x/crypto/pbkdf2"
+	"log"
+	"math"
+	"mime/multipart"
 )
 
 var (
@@ -68,22 +70,51 @@ func GenSnowFlakeId(node int64) (*int64, error) {
 }
 
 func GetMP3Length(sang *multipart.FileHeader) (time *int64, err error) {
-    temp, err := sang.Open()
-    if err != nil {
-        return nil, err
-    }
-    defer temp.Close()
+	temp, err := sang.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer temp.Close()
 
-    decoder, err := mp3.NewDecoder(temp)
-    if err != nil {
-        return nil, err
-    }
+	decoder, err := mp3.NewDecoder(temp)
+	if err != nil {
+		return nil, err
+	}
 
-    sampleRate := decoder.SampleRate()
-    totalSamples := decoder.Length()
-    durationSeconds := float64(totalSamples) / float64(sampleRate)
+	sampleRate := decoder.SampleRate()
+	totalSamples := decoder.Length()
+	durationSeconds := float64(totalSamples) / float64(sampleRate)
 
-    res := int64(math.Ceil(durationSeconds / 4))
+	res := int64(math.Ceil(durationSeconds / 4))
 
-    return &res, nil
+	return &res, nil
+}
+
+func generateSalt(length int) ([]byte, error) {
+	salt := make([]byte, length)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return nil, err
+	}
+	return salt, nil
+}
+func hashPassword(password string, salt []byte) []byte {
+	iterations := 100000 // 迭代次数
+	keyLength := 64      // 生成密钥长度（字节）
+
+	// 将字符串密码转换为字节
+	passwordBytes := []byte(password)
+
+	// 使用PBKDF2算法生成密钥
+	return pbkdf2.Key(
+		passwordBytes,
+		salt,
+		iterations,
+		keyLength,
+		sha512.New,
+	)
+}
+func verifyPassword(storedHash []byte, storedSalt []byte, inputPassword string) bool {
+	inputHash := hashPassword(inputPassword, storedSalt)
+	return subtle.ConstantTimeCompare(storedHash, inputHash) == 1
 }

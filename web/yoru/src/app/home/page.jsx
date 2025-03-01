@@ -26,7 +26,9 @@ import {emitter} from "next/client";
 import {GetAlbumInfoByTitle} from "../components/http/queryApi"; 
 import {UserHomePage} from "../components/pages/UserHomePage";
 import {OnLoad} from "../components/pages/OnLoad";
-import {SvgPerson} from "../assets/svg/Person"; 
+import {SvgPerson} from "../assets/svg/Person";
+import {SvgAdmin} from "../assets/svg/Admin";
+import {AdminPage} from "../components/pages/AdminPage"; 
 
 const Page = () => {
   const [state, setState] = useState({
@@ -74,6 +76,11 @@ const Page = () => {
       renderComponent()
   }
 
+  const GoAdminPage=()=>{
+    handleState("currentView","admin")
+    renderComponent()
+  }
+
   const HandlePlayListOpen = () => {
     state.PlayListOpen ? closePlayList() : openPlayList();
     handleState("PlayListOpen", !state.PlayListOpen);
@@ -96,6 +103,8 @@ const Page = () => {
         return <MainPage golist={GetCallbackToListDetailPage} />;
       case 'play':
         return <PlayPage/>;
+      case `admin`:
+        return <AdminPage></AdminPage>
       case 'album':
         return <EditAlbumPage create={true} />;
       case `upload`:
@@ -223,6 +232,9 @@ const Page = () => {
             </NavigationItem>
             <NavigationItem name={`Person`} onClick={() => { GoToUserHome() }}>
               <SvgPerson w={`24`} h={`24`} />
+            </NavigationItem>
+            <NavigationItem name={`Admin`} onClick={()=>{GoAdminPage()}}>
+              <SvgAdmin w={`24`} h={`24`} />
             </NavigationItem>
           </mdui-navigation-drawer>
           <mdui-button

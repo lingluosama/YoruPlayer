@@ -114,6 +114,22 @@ func QueryList(c context.Context, req *app.RequestContext) {
 				})
 			}
 		}
+	case "user":
+		{
+			users, count, err := service.QueryUser(c, begin, size, &keyword)
+			if err != nil {
+				req.JSON(http.StatusBadRequest, models.BaseResponse{
+					Msg:  "service err:" + err.Error(),
+					Data: nil,
+				})
+			} else {
+				req.JSON(http.StatusOK, response.QueryListRes{
+					Msg:    "Ac",
+					Data:   users,
+					Length: count,
+				})
+			}
+		}
 	}
 }
 func GetAlbumInfoByTitle(c context.Context, req *app.RequestContext) {

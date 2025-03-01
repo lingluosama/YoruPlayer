@@ -7,6 +7,8 @@ import (
 	"YoruPlayer/service/query"
 	"context"
 	"errors"
+	"fmt"
+	"gorm.io/gorm"
 	"log"
 	"mime/multipart"
 	"path/filepath"
@@ -22,7 +24,8 @@ func UserLogin(c context.Context, name string, password string) (*response.UserL
 	if user == nil {
 		return nil, errors.New("can't find user")
 	}
-	if user.Password != password {
+	isValid := verifyPassword([]byte(user.Password), []byte(user.Salt), password)
+	if isValid == false {
 		return nil, errors.New("wrong password")
 	}
 	res := &response.UserLoginRes{
@@ -40,6 +43,7 @@ func ConverseUserToResponse(user *Db.User) response.User {
 		Avatar:    user.Avatar,
 		Signature: user.Signature,
 		Email:     user.Email,
+		Authority: user.Authority,
 	}
 }
 
@@ -58,30 +62,42 @@ func GetUserInfo(c context.Context, uid string) (*response.User, error) {
 }
 
 func UserRegister(c context.Context, name string, password string, email string) error {
-
+	// 生成用户ID
 	id, err := GenSnowFlakeId(1)
 	if err != nil {
 		log.Panicln("SnowFlakeErr:", err)
 	}
 
+	salt, _ := generateSalt(16)
+	hashedPassword := hashPassword(password, salt)
+
+	u := query.User
+
+	// 检查是否是第一个用户
+	userCount, err := u.WithContext(c).Count()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("check user count failed: %w", err)
+	}
+
 	user := &Db.User{
 		Id:        *id,
 		Name:      name,
-		Password:  password,
+		Password:  string(hashedPassword),
 		Avatar:    configs.DefaultUserAvatar,
 		Signature: "There is nothing",
 		Email:     email,
+		Salt:      string(salt),
+		Authority: userCount == 0,
 	}
-	u := query.User
+
 	_, err = u.WithContext(c).Where(u.Name.Eq(name)).First()
 	if err == nil {
 		return errors.New("user existed")
-	} else if err != nil && err.Error() != "record not found" {
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 
-	err = u.WithContext(c).Save(user)
-	if err != nil {
+	if err = u.WithContext(c).Save(user); err != nil {
 		log.Println("Save New User failed:", err)
 		return err
 	}

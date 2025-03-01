@@ -231,8 +231,12 @@ export function UserHomePage(props) {
                         <div
                             className={`text-sm text-gray-400`}>{state.sanglist_list && state.sanglist_list.length || 0}个公开歌单
                         </div>
-                        <div className={`text-8xl font-bold`}>{state.current_user ? state.current_user.name : ``}</div>
-                        <div className={``}>个人资料</div>
+                        <div className={`flex flex-row items-end`}>
+                            <div className={`text-8xl font-bold`}>{state.current_user ? state.current_user.name : ``}</div>
+                            {state.current_user.authority && <div className={`text-sm text-green-400`}>管理员</div>}
+                        </div>
+                            
+                            <div className={``}>个人资料</div>
                     </div>
                 </div>
                 <mdui-divider></mdui-divider>
@@ -249,7 +253,14 @@ export function UserHomePage(props) {
                             handleState("displayModal", true)
                         }}>编辑个人资料
                         </div>
-                        <div className={`hover:cursor-pointer hover:bg-white hover:bg-opacity-10`}>退出登陆</div>
+                        <div className={`hover:cursor-pointer hover:bg-white hover:bg-opacity-10`} onClick={()=>{
+                            localStorage.removeItem("uid")
+                            localStorage.removeItem("token")
+                            window.location.href = "/login";
+
+
+
+                        }}>退出登陆</div>
                     </div>
                 </div>
                 <div className={`flex w-full space-y-5  flex-col relative transition-all duration-300`}>
@@ -274,14 +285,14 @@ export function UserHomePage(props) {
                             <div className={`cursor-pointer hover:underline`} onClick={()=>handleState("show_all_history",false)}>收起</div>
                             :<div onClick={()=>handleState("show_all_history",true)} className={`cursor-pointer hover:underline`} >显示全部</div>}
                     </div>
-                    <div className={`w-full space-y-3 flex flex-col  transition-all duration-300`}>
-                        <div className={`w-full flex flex-row`}>
-                            <div className={`w-1/3 text-end`}>标题</div>
-                            <div className={`w-1/3 text-end`}>作者</div>
-                            <div className={`w-1/3 text-end`}>播放次数</div>
+                    <div  className={`w-full space-y-3 flex flex-col  transition-all duration-300`}>
+                        <div key={1} className={`w-full flex flex-row`}>
+                            <div key={2} className={`w-1/3 text-end`}>标题</div>
+                            <div key={3} className={`w-1/3 text-end`}>作者</div>
+                            <div key={4} className={`w-1/3 text-end`}>播放次数</div>
                         </div>
                         {state.history && state.history.slice(0,state.show_all_history?state.history.length:4).map((item, index) => {
-                            return <div className={`w-full flex flex-col relative transition-all duration-300`}>
+                            return <div key={index} className={`w-full flex flex-col relative transition-all duration-300`}>
                                 <div
                                     onMouseOver={() => {
                                         handleState("history_index", index)
@@ -296,9 +307,9 @@ export function UserHomePage(props) {
                                     <div className={`w-1/3 text-end`}>{item.Single.author}</div>
                                     <div className={`w-1/3 text-end mr-3`}>{item.Count}</div>
                                 </div>
-                                {<div key={index} className={`w-full flex flex-row transition-all space-x-6 items-center duration-300 ${state.history_index===index?`h-10 `:`h-0 bottom-0 opacity-0`} `}>{
+                                {<div  className={`w-full flex flex-row transition-all space-x-6 items-center duration-300 ${state.history_index===index?`h-10 `:`h-0 bottom-0 opacity-0`} `}>{
                                     item.Tags&&item.Tags.map((Tag,index)=>{
-                                    return  <div className={`w-12 h-6 rounded-2xl  bg-gray-700 items-center text-center`}>
+                                    return  <div key={index} className={`w-12 h-6 rounded-2xl  bg-gray-700 items-center text-center`}>
                                         {Tag}
                                     </div>
                                     })

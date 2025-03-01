@@ -74,6 +74,9 @@ func InitController() *server.Hertz {
 	recGroup.POST("/tag/add/sanglist", AddTagForSangList)
 	recGroup.GET("/tag/search", SearchTag)
 
+	adminGroup := h.Group("/admin")
+	adminGroup.POST("/delete", middleware.AdminAuth(), DeleteHandler)
+	adminGroup.POST("/grant", middleware.AdminAuth(), GrantAdmin)
 	err := h.Run()
 	if err != nil {
 		log.Panicln("fail start controller", err)

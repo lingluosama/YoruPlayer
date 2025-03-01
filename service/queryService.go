@@ -116,6 +116,20 @@ func convertTagsToResponse(tags []*Db.Tag) []*response.Tag {
 	}
 	return responseTags
 }
+func convertUserToResponse(users []*Db.User) []*response.User {
+	var responseUsers []*response.User
+	for _, user := range users {
+		responseUsers = append(responseUsers, &response.User{
+			Id:        strconv.FormatInt(user.Id, 10),
+			Name:      user.Name,
+			Avatar:    user.Avatar,
+			Signature: user.Signature,
+			Email:     user.Email,
+			Authority: user.Authority,
+		})
+	}
+	return responseUsers
+}
 
 func QueryTagList(c context.Context, begin int, size int, keyword *string) ([]*response.Tag, int32, error) {
 	db := query.Tag.WithContext(c)
@@ -154,7 +168,25 @@ func QueryAuthor(c context.Context, begin int, size int, keyword *string) ([]*re
 	responseAuthors := convertAuthorToResponse(find)
 	return responseAuthors, int32(count), nil
 }
+func QueryUser(c context.Context, begin int, size int, keyword *string) ([]*response.User, int32, error) {
+	db := query.User.WithContext(c)
+	if keyword != nil && *keyword != "" {
+		db = db.Where(query.User.Name.Like("%" + *keyword + "%"))
+	}
 
+	find, err := db.Limit(int(size)).Offset(int(begin)).Find()
+	if err != nil {
+		return nil, 0, err
+	}
+	count, err := db.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	responseAuthors := convertUserToResponse(find)
+	return responseAuthors, int32(count), nil
+
+}
 func convertAuthorToResponse(authors []*Db.Author) []*response.Author {
 	var responseAuthors []*response.Author
 	for _, author := range authors {

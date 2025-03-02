@@ -23,6 +23,9 @@ export function ListItem(props) {
     const ChangePlay= async ()=>{
        await  emitter.emit("AddPlayQueue",{sid:props.sid,target:"replace"});
     }
+    const AddTail= async ()=>{
+        await  emitter.emit("AddPlayQueue",{sid:props.sid,target:"tail"});
+    }
     const RemoveFromQueue= ()=>{
         emitter.emit("DeletePlayQueue",{sid:props.sid})
     }
@@ -112,14 +115,18 @@ export function ListItem(props) {
                         </div>
                         <div className={`m-1  flex  flex-col`}>
                             <div
-                                className={`space-x-5 flex flex-row w-full h-8 items-center hover:bg-white hover:bg-opacity-5`}>
+                                className={`space-x-5 flex flex-row w-full h-8 items-center hover:bg-white hover:bg-opacity-5`}
+                                onClick={AddToQueue}
+                            >
                                 <SvgAdd w={`16`} h={`16`}></SvgAdd>
                                 <div>添加到下一首</div>
                             </div>
                         </div>
                         <div className={`m-1  flex flex-col`}>
                             <div
-                                className={`space-x-5 flex flex-row w-full h-8 items-center hover:bg-white hover:bg-opacity-5`}>
+                                className={`space-x-5 flex flex-row w-full h-8 items-center hover:bg-white hover:bg-opacity-5`}
+                                onClick={AddTail}
+                            >
                                 <SvgAdd w={`16`} h={`16`}></SvgAdd>
                                 <div>添加到队尾</div>
                             </div>

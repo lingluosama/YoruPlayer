@@ -53,7 +53,7 @@ export const BottomBar =(props)=>{
         emitter.emit("DeletePlayQueue",{sid:state.sid})
       }
       const PreSang=()=>{
-        
+          emitter.emit('BackOffQueue',{})
       }
       
     

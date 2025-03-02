@@ -233,7 +233,7 @@ export function UserHomePage(props) {
                         </div>
                         <div className={`flex flex-row items-end`}>
                             <div className={`text-8xl font-bold`}>{state.current_user ? state.current_user.name : ``}</div>
-                            {state.current_user.authority && <div className={`text-sm text-green-400`}>管理员</div>}
+                            {state.current_user&&state.current_user.authority && <div className={`text-sm text-green-400`}>管理员</div>}
                         </div>
                             
                             <div className={``}>个人资料</div>

@@ -64,7 +64,7 @@ export const AddPlayListProvider=({children})=>{
                     </div>
                     <mdui-divider></mdui-divider>
                     <div className={`h-full overflow-auto w-full flex flex-col ${hidden?`hidden`:``}`} key={0}>{
-                        list.length>0&&list.map((item,index)=> {
+                        list&&list.map((item,index)=> {
                          return <div key={index+1} className={`h-1/5 rounded-2xl mt-3 items-center w-full duration-300 transition-all hover:bg-white  hover:bg-opacity-10 flex flex-row`}>
                              <div className={`h-full w-1/3 justify-items-start items-center flex flex-row`}>
                                  <img alt={`img`} src={`http://${item.sangList.cover}`}

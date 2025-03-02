@@ -58,11 +58,13 @@ create table users
 (
     id        bigint auto_increment
         primary key,
-    name      text null,
-    password  text null,
-    avatar    text null,
-    signature text null,
-    email     text null
+    name      text                 null,
+    password  varbinary(256)       null,
+    avatar    text                 null,
+    signature text                 null,
+    email     text                 null,
+    authority tinyint(1) default 0 null,
+    salt      varbinary(64)        null
 );
 
 create table `sang-list`
@@ -87,3 +89,4 @@ create table `sang-tolist`
     constraint `sang-tolist_singles_id_fk`
         foreign key (sid) references singles (id)
 );
+

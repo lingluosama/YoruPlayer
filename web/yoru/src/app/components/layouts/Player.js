@@ -1,6 +1,8 @@
-import React, { useImperativeHandle, useRef, useState, forwardRef, useEffect } from "react"; 
-import {emitter} from "next/client"; 
-import {AddToQueue,DeleteToQueue, GetPlayQueue} from "../http/PlayApi";
+import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
+import {emitter} from "next/client";
+import {AddToQueue, DeleteToQueue, GetPlayQueue} from "../http/PlayApi";
+import {useNotification} from "../providers/NotificationProvider";
+import {debounce} from "next/dist/server/utils";
 
 const PlayerComponent = forwardRef((props, ref) => {
   const audioRef = useRef(null);
@@ -8,8 +10,10 @@ const PlayerComponent = forwardRef((props, ref) => {
     CurrentTime: 0,
     IsPlaying: false,
     CurrentSang:null,
-    PlayList:[],
+    HistoryList:[],  
   });
+  const [currentList, setCurrentList] = useState([])
+  const [historyList,setHistoryList]=useState([])  
     
   const handleChange = (name, value) => {
     setState((prevState) => ({ ...prevState, [name]: value }));
@@ -24,11 +28,13 @@ const PlayerComponent = forwardRef((props, ref) => {
           });
   }
   
-    const FetchPlayQueue=async ()=>{
+    const FetchPlayQueue=async (isBackOff)=>{
         const uid = localStorage.getItem("uid");
         const res = await GetPlayQueue({uid});
-        handleChange("PlayList",res.data.sang_list);
-        if(res.data.sang_list)setState((prevState)=>{
+        setCurrentList(prev => {
+            return res.data?res.data.sang_list:[];
+        });
+        if(res.data&&res.data.sang_list)setState((prevState)=>{
             const newPlayList=res.data.sang_list
             if(!prevState.CurrentSang || prevState.CurrentSang.id !== newPlayList[0].id){
                 const newCurrentSang=newPlayList[0];
@@ -45,13 +51,66 @@ const PlayerComponent = forwardRef((props, ref) => {
             }
         })
     }
+    
+    const{showNotification}= useNotification()
+    const BackOffQueue=useRef(
+        debounce(async ()=>{
+            setHistoryList( (pre)=>{
+                if(pre.length>0){
+                    const uid = localStorage.getItem("uid");
+                    AddToQueue({uid:uid,target:"replace",sid:pre[pre.length-1].id});
+                    pre.pop()
+                }else{
+                    showNotification("error","已经是历史最后一项")
+                }
+                return pre
+            })
+            
+        },200)
+    ).current
+    
     const AddToPlayQueue=async ({sid,target})=>{
         const uid = localStorage.getItem("uid");
+        if(target==="replace"){
+            setCurrentList(pre=>{
+                if(pre){
+                    setHistoryList(prevState =>{
+                        if(!prevState){
+                            prevState.push(pre[0])
+                        }else{
+                            if(prevState[prevState.length-1]!==pre[0]){
+                                prevState.push(pre[0])
+                            }
+                        }
+                        return prevState
+                    })
+                }
+            })
+        }
         await AddToQueue({uid:uid,target:target,sid:sid});
+        
         await FetchPlayQueue()
     }
     const DeleteFormPlayQueue=async ({sid})=>{
         const uid = localStorage.getItem("uid");
+        setCurrentList(pre=>{
+            if(pre){
+                if(pre[0].id===sid){
+                    setHistoryList(prevState =>{
+                        if(!prevState){
+                            prevState.push(pre[0])
+                        }else{
+                            if(prevState[prevState.length-1]!==pre[0]){
+                                prevState.push(pre[0])
+                            }
+                        }
+                        console.log(prevState)
+                        return prevState
+                    })
+                }
+            }
+        })
+        
         await DeleteToQueue({uid:uid,sid:sid})
         await FetchPlayQueue()
     }
@@ -114,6 +173,7 @@ const PlayerComponent = forwardRef((props, ref) => {
     emitter.on('DeletePlayQueue',DeleteFormPlayQueue);
     emitter.on(`ChangeVolume`,HandleVolumeChange);
     emitter.on(`FetchPlayQueue`,FetchPlayQueue);
+    emitter.on(`BackOffQueue`,async ()=>{BackOffQueue();await FetchPlayQueue()})
     if(audioRef.current){audioRef.current.volume=localStorage.getItem("volume")/100;}
     return () => {
       emitter.off('PlayDuration', HandleProgress);
@@ -132,8 +192,8 @@ const PlayerComponent = forwardRef((props, ref) => {
   
   
   useEffect(() => {
-    	props.queryPlayList(state.PlayList)
-  }, [state.PlayList]);
+    	props.queryPlayList(currentList)
+  }, [currentList]);
   useEffect(() => {
       
       setTimeout(() => {
